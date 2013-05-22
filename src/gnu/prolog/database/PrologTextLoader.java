@@ -201,7 +201,20 @@ public class PrologTextLoader
 			}
 			catch (ParseException ex)
 			{
-				// ex.printStackTrace();
+				// check if exception is due to an unexpected token
+				try
+				{
+					// tries to read the term
+					currentReader.readTerm();
+				}
+				// parse exception caught if unexpected token encountered
+				catch (ParseException e)
+				{
+					// error e is logged
+					logError(e);
+					// breaks out of the loop, returns matched goals
+					break;
+				}
 				logError(ex);
 				continue;
 			}
