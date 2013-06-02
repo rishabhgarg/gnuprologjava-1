@@ -1,0 +1,17 @@
+/* file unicode_mapper */
+/* 
+U+2010 ‐
+U+2212 −
+u+02C3 ˲
+conversion to the U+002D '-' that is used
+*/
+
+[unicode_mapper(‐, -), success].
+[unicode_mapper(/, -), failure].
+[unicode_mapper(−, -), success].
+[unicode_mapper(˲, >), success].
+[unicode_mapper(ē, e), success].
+[unicode_mapper(ē, é), failure].
+[unicode_mapper(˲, Result), [[Result <-- >]]].
+
+/* end of unicode_mapper */
