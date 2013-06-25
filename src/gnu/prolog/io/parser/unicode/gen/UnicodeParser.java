@@ -14,9 +14,9 @@ public class UnicodeParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		UNICODE=1, WS=2;
+		WS=1, UNICODE=2;
 	public static final String[] tokenNames = {
-		"<INVALID>", "UNICODE", "WS"
+		"<INVALID>", "WS", "UNICODE"
 	};
 	public static final int
 		RULE_unicode_test = 0;
@@ -74,7 +74,7 @@ public class UnicodeParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\2\3\4\7\4\2\t\2\3\2\3\2\3\2\2\3\2\2\2\5\2\4\3\2\2\2\4\5\7\3\2\2\5\3\3"+
+		"\2\3\4\7\4\2\t\2\3\2\3\2\3\2\2\3\2\2\2\5\2\4\3\2\2\2\4\5\7\4\2\2\5\3\3"+
 		"\2\2\2\2";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
