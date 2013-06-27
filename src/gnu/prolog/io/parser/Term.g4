@@ -41,7 +41,6 @@ public int getCurrentColumn()
         return stream.getEndColumn();
     } 
  
-//NameToken file does not return any instances 
 public boolean isFunctor()
     {
         return _input.LA(1) == TermParser.NAME_TOKEN &&
@@ -51,95 +50,104 @@ public boolean isFunctor()
 boolean testOp(ReadOptions Options, int i)
     {
         Token tk = _input.LT(i);
-        return tk instanceof NameToken && ((NameToken)tk).isOperator(Options.operatorSet);
+        NameToken ntk = new NameToken(tk);
+        return ntk.isOperator(Options.operatorSet);
     }
 
 boolean testNoOp (ReadOptions Options)
     {
         Token tk = _input.LT(1);
-        return tk instanceof NameToken && ((NameToken)tk).isNonOperator(Options.operatorSet);
+        NameToken ntk = new NameToken(tk);
+        return ntk.isNonOperator(Options.operatorSet);
     }
 
 boolean testFX (ReadOptions Options, int priority)
     {
         Token tk = _input.LT(1);
-        return !isFunctor() && tk instanceof NameToken && ((NameToken)tk).isFxOperator(Options.operatorSet,priority);
+        NameToken ntk = new NameToken(tk);
+        return !isFunctor() && ntk.isFxOperator(Options.operatorSet,priority);
     }
-  
+
 boolean testFY (ReadOptions Options, int priority)
     {
         Token tk = _input.LT(1);
-        return !isFunctor() && tk instanceof NameToken && ((NameToken)tk).isFyOperator(Options.operatorSet,priority);
+        NameToken ntk = new NameToken(tk);
+        return !isFunctor() && ntk.isFyOperator(Options.operatorSet,priority);
     }
-  
+
 boolean testXFX(ReadOptions Options, int priority)
     {
         Token tk = _input.LT(1);
-        return tk instanceof NameToken && ((NameToken)tk).isXfxOperator(Options.operatorSet,priority);
+        NameToken ntk = new NameToken(tk);
+        return ntk.isXfxOperator(Options.operatorSet,priority);
     }
-  
+
 boolean testXFY(ReadOptions Options, int priority)
     {
         Token tk = _input.LT(1);
+        NameToken ntk = new NameToken(tk);
         int tk_name = _input.LA(1);
         return priority >= Options.operatorSet.getCommaLevel() && tk_name == COMMA_TOKEN  ||
-               tk instanceof NameToken && ((NameToken)tk).isXfyOperator(Options.operatorSet,priority);
+               ntk.isXfyOperator(Options.operatorSet,priority);
     }
-  
+
 boolean testYFX(ReadOptions Options, int priority)
-  {
-    Token tk = _input.LT(1);
-    return tk instanceof NameToken && ((NameToken)tk).isYfxOperator(Options.operatorSet,priority);
-  }
-  
-boolean testXF (ReadOptions Options, int priority)
-  {
-    Token tk = _input.LT(1);
-    return tk instanceof NameToken && ((NameToken)tk).isXfOperator(Options.operatorSet,priority);
-  }
-  
-  boolean testYF (ReadOptions Options, int priority)
-  {
-    Token tk = _input.LT(1);
-    return tk instanceof NameToken && ((NameToken)tk).isYfOperator(Options.operatorSet,priority);
-  }
-  
-  public boolean isExpSeparator(int i)
-  {
-    Token tk = _input.LT(i);
-    switch (_input.LA(i))
     {
-    case COMMA_TOKEN              :
-    case CLOSE_TOKEN              :
-    case CLOSE_CURLY_TOKEN        :
-    case CLOSE_LIST_TOKEN         :
-    case END_TOKEN                :
-    case EOF                      :
-    case HEAD_TAIL_SEPARATOR_TOKEN:
-      return true;
-    default:
-      return false;
+        Token tk = _input.LT(1);
+        NameToken ntk = new NameToken(tk);
+        return ntk.isYfxOperator(Options.operatorSet,priority);
     }
-  }
+
+boolean testXF (ReadOptions Options, int priority)
+    {
+        Token tk = _input.LT(1);
+        NameToken ntk = new NameToken(tk);
+        return ntk.isXfOperator(Options.operatorSet,priority);
+    }
+
+boolean testYF (ReadOptions Options, int priority)
+    {
+        Token tk = _input.LT(1);
+        NameToken ntk = new NameToken(tk);
+        return ntk.isYfOperator(Options.operatorSet,priority);
+    }
+  
+public boolean isExpSeparator(int i)
+    {
+        Token tk = _input.LT(i);
+        switch (_input.LA(i))
+        {
+            case COMMA_TOKEN              :
+            case CLOSE_TOKEN              :
+            case CLOSE_CURLY_TOKEN        :
+            case CLOSE_LIST_TOKEN         :
+            case END_TOKEN                :
+            case EOF                      :
+            case HEAD_TAIL_SEPARATOR_TOKEN:
+                return true;
+            default:
+                return false;
+        }
+    }
   
 boolean is1201Separator(int i)
-{
-    switch (_input.LA(i))
     {
-        case CLOSE_TOKEN              :
-        case CLOSE_CURLY_TOKEN        :
-        case END_TOKEN                :
-        case EOF                      :
-        return true;
-        default:
-        return false;
+        switch (_input.LA(i))
+        {
+            case CLOSE_TOKEN              :
+            case CLOSE_CURLY_TOKEN        :
+            case END_TOKEN                :
+            case EOF                      :
+                return true;
+            default:
+                return false;
+        }
     }
-}
 
 Term createTerm(CompoundTermTag op, Term t)
 {
     if (op.arity != 1) 
-   {
+    {
         throw new IllegalArgumentException("Arity of term tag must be 1");
     }
     return new CompoundTerm(op, new Term[]{t});
@@ -191,6 +199,7 @@ readTermEof[ReadOptions Options] returns [Term t]
           EOF
     ;
   
+//Verification done below this. List term wont work because of testOp and testNoOp.
 //Operator Term not implemented so not included in the term alternatives
 term[ReadOptions Options, int priority] returns [Term t]
 locals [boolean pIs1201, boolean pIsZero]
@@ -622,19 +631,7 @@ NAME_TOKEN
         | QUOTED_TOKEN
         | SEMICOLON_TOKEN
         | CUT_TOKEN 
-        | UNICODE
     ;
-
-UNICODE
-        : ['\u00C0'..'\u00D6']
-        | ['\u00D8'..'\u00F6'] 
-        | ['\u00F8'..'\u02FF'] 
-        | ['\u0370'..'\u037D'] 
-        | ['\u037F'..'\u1FFF']
-        | ['\u200C'..'\u200D']
-      
-    ;
-
 
 VARIABLE_TOKEN
 	: ANONYMOUS_VARIABLE

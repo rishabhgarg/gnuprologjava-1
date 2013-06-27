@@ -1,6 +1,7 @@
 /* GNU Prolog for Java
  * Copyright (C) 1997-1999  Constantine Plotnikov
  * Copyright (C) 2010       Daniel Thomas
+ * Copyright (C) 2013       Rishabh Garg
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -16,15 +17,24 @@
  * Boston, MA  02111-1307, USA. The text of license can be also found
  * at http://www.gnu.org/copyleft/lgpl.html
  */
+
+/*
+Better documentation and comments required
+*/
 package gnu.prolog.io.parser;
 
 import gnu.prolog.io.Operator;
 import gnu.prolog.io.OperatorSet;
 import gnu.prolog.io.Operator.SPECIFIER;
-import gnu.prolog.io.parser.gen.Token;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Token;
 
-public class NameToken extends Token
+public class NameToken extends CommonToken
 {
+    public NameToken(Token oldToken) {
+        super(oldToken);
+	}
+    
 	public Operator fxOp; // prefix operator
 	public Operator xfOp; // postfix of infix operator
 	public String value; // converted value
@@ -33,13 +43,13 @@ public class NameToken extends Token
 	{
 		if (value == null)
 		{
-			if (image.charAt(0) == '\'') // if quoted string
+			if (text.charAt(0) == '\'') // if quoted string
 			{
-				value = TermParserUtils.convertQuotedString(image, '\'');
+				value = TermParserUtils.convertQuotedString(text, '\'');
 			}
 			else
 			{
-				value = image;
+				value = text;
 			}
 		}
 		return value;

@@ -24,32 +24,32 @@ public class TermParser extends Parser {
 		WS=1, SPECIAL_TOKEN=2, OPEN_LIST_TOKEN=3, CLOSE_LIST_TOKEN=4, HEAD_TAIL_SEPARATOR_TOKEN=5, 
 		OPEN_TOKEN=6, CLOSE_TOKEN=7, OPEN_CURLY_TOKEN=8, CLOSE_CURLY_TOKEN=9, 
 		COMMA_TOKEN=10, END_TOKEN=11, END_CHAR=12, OPEN_LIST_CHAR=13, CLOSE_LIST_CHAR=14, 
-		HEAD_TAIL_SEPARATOR_CHAR=15, NAME_TOKEN=16, UNICODE=17, VARIABLE_TOKEN=18, 
-		INTEGER_TOKEN=19, ANONYMOUS_VARIABLE=20, NAMED_VARIABLE=21, VARIABLE_INDICATOR_CHAR=22, 
-		IDENTIFIER_TOKEN=23, ALPHA_NUMERIC_CHAR=24, ALPHA_CHAR=25, LETTER_CHAR=26, 
-		GRAPHIC_TOKEN=27, GRAPHIC_TOKEN_CHAR=28, QUOTED_TOKEN=29, SINGLE_QUOTED_ITEM=30, 
-		CONTINUATION_ESCAPE_SEQUENCE=31, SEMICOLON_TOKEN=32, CUT_TOKEN=33, GRAPHIC_CHAR=34, 
-		CUT_CHAR=35, OPEN_CHAR=36, CLOSE_CHAR=37, COMMA_CHAR=38, SEMICOLON_CHAR=39, 
-		OPEN_CURLY_CHAR=40, CLOSE_CURLY_CHAR=41, END_LINE_COMMENT_CHAR=42, CAPITAL_LETTER_CHAR=43, 
-		SMALL_LETTER_CHAR=44, DECIMAL_DIGIT_CHAR=45, UNDERSCORE_CHAR=46, BACKSLASH_CHAR=47, 
-		SINGLE_QUOTE_CHAR=48, DOUBLE_QUOTE_CHAR=49, BACK_QUOTE_CHAR=50, SINGLE_QUOTED_CHAR=51, 
-		NON_QUOTE_CHAR=52, CHARACTER=53, DOUBLE_QUOTED_CHAR=54, BACK_QUOTED_CHAR=55, 
-		META_ESCAPE_SEQUENCE=56, CONTROL_ESCAPE_SEQUENCE=57, SYMBOLIC_CONTROL_CHAR=58, 
-		SYMBOLIC_ALERT_CHAR=59, SYMBOLIC_BACKSPACE_CHAR=60, SYMBOLIC_FORM_FEED_CHAR=61, 
-		SYMBOLIC_NEW_LINE_CHAR=62, SYMBOLIC_HORIZONTAL_TAB_CHAR=63, SYMBOLIC_VERTICAL_TAB_CHAR=64, 
-		SYMBOLIC_CARRIAGE_RETURN_CHAR=65, SYMBOLIC_HEXADECIMAL_CHAR=66, OCTAL_ESCAPE_SEQUENCE=67, 
-		HEXADECIMAL_ESCAPE_SEQUENCE=68, INTEGER_CONSTANT=69, CHARACTER_CODE_CONSTANT=70, 
-		BINARY_CONSTANT=71, OCTAL_CONSTANT=72, HEXADECIMAL_CONSTANT=73, FLOAT_NUMBER_TOKEN=74, 
-		FRACTION=75, EXPONENT=76, CHAR_CODE_LIST_TOKEN=77, DOUBLE_QUOTED_ITEM=78, 
-		BACK_QUOTED_STRING=79, BACK_QUOTED_ITEM=80, GRAPHIC_CHAR_PERIOD=81, BINARY_DIGIT_CHAR=82, 
-		OCTAL_DIGIT_CHAR=83, HEXADECIMAL_DIGIT_CHAR=84, SOLO_CHAR=85, LAYOUT_CHAR=86, 
-		SPACE_CHAR=87, NEW_LINE_CHAR=88, META_CHAR=89, LAYOUT_TEXT_SEQUENCE=90, 
-		LAYOUT_TEXT=91, COMMENT=92, SINGLE_LINE_COMMENT=93, BRACKETED_COMMENT=94;
+		HEAD_TAIL_SEPARATOR_CHAR=15, NAME_TOKEN=16, VARIABLE_TOKEN=17, INTEGER_TOKEN=18, 
+		ANONYMOUS_VARIABLE=19, NAMED_VARIABLE=20, VARIABLE_INDICATOR_CHAR=21, 
+		IDENTIFIER_TOKEN=22, ALPHA_NUMERIC_CHAR=23, ALPHA_CHAR=24, LETTER_CHAR=25, 
+		GRAPHIC_TOKEN=26, GRAPHIC_TOKEN_CHAR=27, QUOTED_TOKEN=28, SINGLE_QUOTED_ITEM=29, 
+		CONTINUATION_ESCAPE_SEQUENCE=30, SEMICOLON_TOKEN=31, CUT_TOKEN=32, GRAPHIC_CHAR=33, 
+		CUT_CHAR=34, OPEN_CHAR=35, CLOSE_CHAR=36, COMMA_CHAR=37, SEMICOLON_CHAR=38, 
+		OPEN_CURLY_CHAR=39, CLOSE_CURLY_CHAR=40, END_LINE_COMMENT_CHAR=41, CAPITAL_LETTER_CHAR=42, 
+		SMALL_LETTER_CHAR=43, DECIMAL_DIGIT_CHAR=44, UNDERSCORE_CHAR=45, BACKSLASH_CHAR=46, 
+		SINGLE_QUOTE_CHAR=47, DOUBLE_QUOTE_CHAR=48, BACK_QUOTE_CHAR=49, SINGLE_QUOTED_CHAR=50, 
+		NON_QUOTE_CHAR=51, CHARACTER=52, DOUBLE_QUOTED_CHAR=53, BACK_QUOTED_CHAR=54, 
+		META_ESCAPE_SEQUENCE=55, CONTROL_ESCAPE_SEQUENCE=56, SYMBOLIC_CONTROL_CHAR=57, 
+		SYMBOLIC_ALERT_CHAR=58, SYMBOLIC_BACKSPACE_CHAR=59, SYMBOLIC_FORM_FEED_CHAR=60, 
+		SYMBOLIC_NEW_LINE_CHAR=61, SYMBOLIC_HORIZONTAL_TAB_CHAR=62, SYMBOLIC_VERTICAL_TAB_CHAR=63, 
+		SYMBOLIC_CARRIAGE_RETURN_CHAR=64, SYMBOLIC_HEXADECIMAL_CHAR=65, OCTAL_ESCAPE_SEQUENCE=66, 
+		HEXADECIMAL_ESCAPE_SEQUENCE=67, INTEGER_CONSTANT=68, CHARACTER_CODE_CONSTANT=69, 
+		BINARY_CONSTANT=70, OCTAL_CONSTANT=71, HEXADECIMAL_CONSTANT=72, FLOAT_NUMBER_TOKEN=73, 
+		FRACTION=74, EXPONENT=75, CHAR_CODE_LIST_TOKEN=76, DOUBLE_QUOTED_ITEM=77, 
+		BACK_QUOTED_STRING=78, BACK_QUOTED_ITEM=79, GRAPHIC_CHAR_PERIOD=80, BINARY_DIGIT_CHAR=81, 
+		OCTAL_DIGIT_CHAR=82, HEXADECIMAL_DIGIT_CHAR=83, SOLO_CHAR=84, LAYOUT_CHAR=85, 
+		SPACE_CHAR=86, NEW_LINE_CHAR=87, META_CHAR=88, LAYOUT_TEXT_SEQUENCE=89, 
+		LAYOUT_TEXT=90, COMMENT=91, SINGLE_LINE_COMMENT=92, BRACKETED_COMMENT=93;
 	public static final String[] tokenNames = {
 		"<INVALID>", "WS", "SPECIAL_TOKEN", "OPEN_LIST_TOKEN", "CLOSE_LIST_TOKEN", 
 		"HEAD_TAIL_SEPARATOR_TOKEN", "OPEN_TOKEN", "CLOSE_TOKEN", "OPEN_CURLY_TOKEN", 
 		"CLOSE_CURLY_TOKEN", "COMMA_TOKEN", "END_TOKEN", "'.'", "'['", "']'", 
-		"'|'", "NAME_TOKEN", "UNICODE", "VARIABLE_TOKEN", "INTEGER_TOKEN", "ANONYMOUS_VARIABLE", 
+		"'|'", "NAME_TOKEN", "VARIABLE_TOKEN", "INTEGER_TOKEN", "ANONYMOUS_VARIABLE", 
 		"NAMED_VARIABLE", "VARIABLE_INDICATOR_CHAR", "IDENTIFIER_TOKEN", "ALPHA_NUMERIC_CHAR", 
 		"ALPHA_CHAR", "LETTER_CHAR", "GRAPHIC_TOKEN", "GRAPHIC_TOKEN_CHAR", "QUOTED_TOKEN", 
 		"SINGLE_QUOTED_ITEM", "CONTINUATION_ESCAPE_SEQUENCE", "SEMICOLON_TOKEN", 
@@ -124,7 +124,6 @@ public class TermParser extends Parser {
 	        return stream.getEndColumn();
 	    } 
 	 
-	//NameToken file does not return any instances 
 	public boolean isFunctor()
 	    {
 	        return _input.LA(1) == TermParser.NAME_TOKEN &&
@@ -134,95 +133,104 @@ public class TermParser extends Parser {
 	boolean testOp(ReadOptions Options, int i)
 	    {
 	        Token tk = _input.LT(i);
-	        return tk instanceof NameToken && ((NameToken)tk).isOperator(Options.operatorSet);
+	        NameToken ntk = new NameToken(tk);
+	        return ntk.isOperator(Options.operatorSet);
 	    }
 
 	boolean testNoOp (ReadOptions Options)
 	    {
 	        Token tk = _input.LT(1);
-	        return tk instanceof NameToken && ((NameToken)tk).isNonOperator(Options.operatorSet);
+	        NameToken ntk = new NameToken(tk);
+	        return ntk.isNonOperator(Options.operatorSet);
 	    }
 
 	boolean testFX (ReadOptions Options, int priority)
 	    {
 	        Token tk = _input.LT(1);
-	        return !isFunctor() && tk instanceof NameToken && ((NameToken)tk).isFxOperator(Options.operatorSet,priority);
+	        NameToken ntk = new NameToken(tk);
+	        return !isFunctor() && ntk.isFxOperator(Options.operatorSet,priority);
 	    }
-	  
+
 	boolean testFY (ReadOptions Options, int priority)
 	    {
 	        Token tk = _input.LT(1);
-	        return !isFunctor() && tk instanceof NameToken && ((NameToken)tk).isFyOperator(Options.operatorSet,priority);
+	        NameToken ntk = new NameToken(tk);
+	        return !isFunctor() && ntk.isFyOperator(Options.operatorSet,priority);
 	    }
-	  
+
 	boolean testXFX(ReadOptions Options, int priority)
 	    {
 	        Token tk = _input.LT(1);
-	        return tk instanceof NameToken && ((NameToken)tk).isXfxOperator(Options.operatorSet,priority);
+	        NameToken ntk = new NameToken(tk);
+	        return ntk.isXfxOperator(Options.operatorSet,priority);
 	    }
-	  
+
 	boolean testXFY(ReadOptions Options, int priority)
 	    {
 	        Token tk = _input.LT(1);
+	        NameToken ntk = new NameToken(tk);
 	        int tk_name = _input.LA(1);
 	        return priority >= Options.operatorSet.getCommaLevel() && tk_name == COMMA_TOKEN  ||
-	               tk instanceof NameToken && ((NameToken)tk).isXfyOperator(Options.operatorSet,priority);
+	               ntk.isXfyOperator(Options.operatorSet,priority);
 	    }
-	  
+
 	boolean testYFX(ReadOptions Options, int priority)
-	  {
-	    Token tk = _input.LT(1);
-	    return tk instanceof NameToken && ((NameToken)tk).isYfxOperator(Options.operatorSet,priority);
-	  }
-	  
-	boolean testXF (ReadOptions Options, int priority)
-	  {
-	    Token tk = _input.LT(1);
-	    return tk instanceof NameToken && ((NameToken)tk).isXfOperator(Options.operatorSet,priority);
-	  }
-	  
-	  boolean testYF (ReadOptions Options, int priority)
-	  {
-	    Token tk = _input.LT(1);
-	    return tk instanceof NameToken && ((NameToken)tk).isYfOperator(Options.operatorSet,priority);
-	  }
-	  
-	  public boolean isExpSeparator(int i)
-	  {
-	    Token tk = _input.LT(i);
-	    switch (_input.LA(i))
 	    {
-	    case COMMA_TOKEN              :
-	    case CLOSE_TOKEN              :
-	    case CLOSE_CURLY_TOKEN        :
-	    case CLOSE_LIST_TOKEN         :
-	    case END_TOKEN                :
-	    case EOF                      :
-	    case HEAD_TAIL_SEPARATOR_TOKEN:
-	      return true;
-	    default:
-	      return false;
+	        Token tk = _input.LT(1);
+	        NameToken ntk = new NameToken(tk);
+	        return ntk.isYfxOperator(Options.operatorSet,priority);
 	    }
-	  }
+
+	boolean testXF (ReadOptions Options, int priority)
+	    {
+	        Token tk = _input.LT(1);
+	        NameToken ntk = new NameToken(tk);
+	        return ntk.isXfOperator(Options.operatorSet,priority);
+	    }
+
+	boolean testYF (ReadOptions Options, int priority)
+	    {
+	        Token tk = _input.LT(1);
+	        NameToken ntk = new NameToken(tk);
+	        return ntk.isYfOperator(Options.operatorSet,priority);
+	    }
+	  
+	public boolean isExpSeparator(int i)
+	    {
+	        Token tk = _input.LT(i);
+	        switch (_input.LA(i))
+	        {
+	            case COMMA_TOKEN              :
+	            case CLOSE_TOKEN              :
+	            case CLOSE_CURLY_TOKEN        :
+	            case CLOSE_LIST_TOKEN         :
+	            case END_TOKEN                :
+	            case EOF                      :
+	            case HEAD_TAIL_SEPARATOR_TOKEN:
+	                return true;
+	            default:
+	                return false;
+	        }
+	    }
 	  
 	boolean is1201Separator(int i)
-	{
-	    switch (_input.LA(i))
 	    {
-	        case CLOSE_TOKEN              :
-	        case CLOSE_CURLY_TOKEN        :
-	        case END_TOKEN                :
-	        case EOF                      :
-	        return true;
-	        default:
-	        return false;
+	        switch (_input.LA(i))
+	        {
+	            case CLOSE_TOKEN              :
+	            case CLOSE_CURLY_TOKEN        :
+	            case END_TOKEN                :
+	            case EOF                      :
+	                return true;
+	            default:
+	                return false;
+	        }
 	    }
-	}
 
 	Term createTerm(CompoundTermTag op, Term t)
 	{
 	    if (op.arity != 1) 
-	   {
+	    {
 	        throw new IllegalArgumentException("Arity of term tag must be 1");
 	    }
 	    return new CompoundTerm(op, new Term[]{t});
@@ -1680,7 +1688,7 @@ public class TermParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\2\3`\u00d4\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4"+
+		"\2\3_\u00d4\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4"+
 		"\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20"+
 		"\4\21\t\21\4\22\t\22\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27"+
 		"\4\30\t\30\4\31\t\31\4\32\t\32\3\2\3\2\3\2\3\2\3\2\3\2\5\2;\n\2\3\3\3"+
@@ -1729,10 +1737,10 @@ public class TermParser extends Parser {
 		"\u00a7\u00a9\3\2\2\2\u00a8\u00a4\3\2\2\2\u00a9\u00ac\3\2\2\2\u00aa\u00a8"+
 		"\3\2\2\2\u00aa\u00ab\3\2\2\2\u00ab\u00ad\3\2\2\2\u00ac\u00aa\3\2\2\2\u00ad"+
 		"\u00ae\5$\23\2\u00ae\u00af\b\13\1\2\u00af\25\3\2\2\2\u00b0\u00b1\7\22"+
-		"\2\2\u00b1\u00b2\b\f\1\2\u00b2\27\3\2\2\2\u00b3\u00b4\7\24\2\2\u00b4\u00b5"+
-		"\b\r\1\2\u00b5\31\3\2\2\2\u00b6\u00b7\7\25\2\2\u00b7\u00b8\b\16\1\2\u00b8"+
-		"\33\3\2\2\2\u00b9\u00ba\7L\2\2\u00ba\u00bb\b\17\1\2\u00bb\35\3\2\2\2\u00bc"+
-		"\u00bd\7O\2\2\u00bd\u00be\b\20\1\2\u00be\37\3\2\2\2\u00bf\u00c0\7\b\2"+
+		"\2\2\u00b1\u00b2\b\f\1\2\u00b2\27\3\2\2\2\u00b3\u00b4\7\23\2\2\u00b4\u00b5"+
+		"\b\r\1\2\u00b5\31\3\2\2\2\u00b6\u00b7\7\24\2\2\u00b7\u00b8\b\16\1\2\u00b8"+
+		"\33\3\2\2\2\u00b9\u00ba\7K\2\2\u00ba\u00bb\b\17\1\2\u00bb\35\3\2\2\2\u00bc"+
+		"\u00bd\7N\2\2\u00bd\u00be\b\20\1\2\u00be\37\3\2\2\2\u00bf\u00c0\7\b\2"+
 		"\2\u00c0!\3\2\2\2\u00c1\u00c2\7\b\2\2\u00c2#\3\2\2\2\u00c3\u00c4\7\t\2"+
 		"\2\u00c4%\3\2\2\2\u00c5\u00c6\7\5\2\2\u00c6\'\3\2\2\2\u00c7\u00c8\7\6"+
 		"\2\2\u00c8)\3\2\2\2\u00c9\u00ca\7\n\2\2\u00ca+\3\2\2\2\u00cb\u00cc\7\13"+
