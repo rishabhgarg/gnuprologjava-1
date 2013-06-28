@@ -1,5 +1,6 @@
 /* GNU Prolog for Java
  * Copyright (C) 1997-1999  Constantine Plotnikov
+ * Copyright (C) 2013  		Rishabh Garg
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
@@ -17,15 +18,11 @@
  */
 package gnu.prolog.io.parser;
 
-import gnu.prolog.io.parser.gen.TermParserConstants;
-
 public class TermParserUtils
 {
 
 	private TermParserUtils()
 	{}
-
-	public final static int EOF_TOKEN = TermParserConstants.EOF;
 
 	// lots of duplicated code between this function and the function below
 	public static String convertQuotedString(String str, char quote)
