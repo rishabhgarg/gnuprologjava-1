@@ -1,14 +1,12 @@
 /**
- * This package contains the TermParser.jj file which is used by javacc to
+ * This package contains the TermParser.g4 file which is used by ANTLR 4.1 to
  * generate the parser found in {@link gnu.prolog.io.parser.gen}.
  * 
- * Unfortunately modern versions of javacc cannot be used to regenerate the
- * parser as the parser becomes non-terminating. When you wish to modify
- * something in .gen then you need to also modify the .jj file - if you can't
- * reflect your changes there then don't make those changes.
- * 
- * There is also a TermParser.g file which is an in progress conversion of
- * JavaCC grammar to antlr.
+ * Earlier, javacc was used and unicode support was not provided. 
+ * The parser in .gen supports unicode conforming to the Unicode Consortium.
+ * When you wish to modify something in .gen then you dont't need to also modify the .g4 file
+ * but that would be less beneficial as on regeneration the orignal .gen files would
+ * reappear.
  * 
  * This package also contains classes such as
  * {@link gnu.prolog.io.parser.NameToken NameToken},
@@ -17,7 +15,7 @@
  * some of the code needed to integrate the generated parser with the rest of
  * the codebase.
  * 
- * TODO: parser does not properly handle unicode even in comments @see ReaderCharStream
+ * 
  */
 package gnu.prolog.io.parser;
 
