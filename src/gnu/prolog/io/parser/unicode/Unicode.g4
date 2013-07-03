@@ -1,15 +1,30 @@
 grammar Unicode;
 
 WS
-    : [ \t\n] -> skip;
+    : [ \r\t\u00C0\n] -> skip;
 
-unicode_test
-    : UNICODE
+type
+    : VARIABLE_TOKEN {System.out.println("Var");}
+    | IDENTIFIER_TOKEN {System.out.println("Id");}
     ;
 
-UNICODE
+VARIABLE_TOKEN
+    : CAPITAL_CHAR (ID_Continue)*
+    | UNDERSCORE_CHAR (ID_Continue)*  
+    ;
+
+fragment UNDERSCORE_CHAR
+    : '_'
+    ;
+    
+//Have to remove underscore from ID_Start and put to Variable Token
+IDENTIFIER_TOKEN
     : ID_Start (ID_Continue)*
     ;
+
+fragment CAPITAL_CHAR
+    : LU
+    ;  
 
 fragment ID_Start
     : LL
