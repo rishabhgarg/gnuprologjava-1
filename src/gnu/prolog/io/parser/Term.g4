@@ -268,9 +268,6 @@ op2[ReadOptions Options, int priority] returns [CompoundTermTag tag]
         }
         ;
 
-//Operator Term will be implemented once ANTLR 4.1 is out as ANTLR 4.0 has a bug 
-//that surfaces using multiple predicates
-/*
 operatorTerm[ReadOptions Options, int priority] returns [Term t]
 locals [int token_name, Token token]
 @init
@@ -289,21 +286,17 @@ locals [int token_name, Token token]
           d=op[$Options, p]         {f = $d.tag;}
           e=term[$Options, p-1]     {$t = $e.t; $t = createTerm(f, $t);}
         | g=term[$Options, p-1]     {$t = $g.t;}
-        ;
-          /*  (
-            ({testXFX($Options, $priority)}?
+        (
+            {testXFX($Options, $priority)}?
             h=op2[$Options, p]      {f = $h.tag;}
             i=term[$Options, p-1]   {t2 = $i.t; $t = createTerm(f, $t, t2);}
-            )
             |
-            ({testXF($Options, $priority)}?
+            {testXF($Options, $priority)}?
             j=op2[$Options, p]      {f = $j.tag; $t = createTerm(f, $t);}
-            )
             |
-            ({testXFY($Options, $priority)}?
+            {testXFY($Options, $priority)}?
             k=op2[$Options, p]      {f = $k.tag;}
             l=term[$Options, p]     {t2 = $l.t; $t = createTerm(f, $t, t2);}
-            ));/*
             |
             (
             {$token_name = _input.LA(1); $token = _input.LT(1);}
@@ -319,21 +312,18 @@ locals [int token_name, Token token]
                 {$t = 
                 createTerm(CompoundTermTag.minus2,$t,IntegerTerm.get(-(IntegerTerm.get($token.getText()).value)));
                 }
-                )
-            )
-            );/*
-            
+                )         
                 |
                 (
-                {$token_name = _input.LA(1); $token = _input.LT(1);}
-                {($token_name == INTEGER_TOKEN || $token_name == FLOAT_NUMBER_TOKEN)}?
-                {$token.getText().charAt(0) == '-'}?
+                {$token_name = FLOAT_TOKEN}?
                 FLOAT_NUMBER_TOKEN
                 {$t = 
                 createTerm(CompoundTermTag.minus2,$t,new FloatTerm(-(new FloatTerm($token.getText()).value)));
                 }
                 )
-        ; */
+            )
+        )
+        ; 
 
 simpleTerm[ReadOptions Options] returns [Term t]
 @init
