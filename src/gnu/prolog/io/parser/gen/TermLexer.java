@@ -1,10 +1,6 @@
 // Generated from Term.g4 by ANTLR 4.1
 
 package gnu.prolog.io.parser.gen;
-import gnu.prolog.io.parser.*;
-import gnu.prolog.term.*;
-import gnu.prolog.io.*;
-import gnu.prolog.vm.*;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -134,7 +130,7 @@ public class TermLexer extends Lexer {
 	}
 	private void SPECIAL_TOKEN_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 1: skip();  break;
+		case 1: _channel = HIDDEN;  break;
 		}
 	}
 

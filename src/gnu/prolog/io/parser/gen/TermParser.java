@@ -5,6 +5,7 @@ import gnu.prolog.io.parser.*;
 import gnu.prolog.term.*;
 import gnu.prolog.io.*;
 import gnu.prolog.vm.*;
+import java.io.IOException;
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -68,15 +69,15 @@ public class TermParser extends Parser {
 		"BRACKETED_COMMENT"
 	};
 	public static final int
-		RULE_readTerm = 0, RULE_readTermEof = 1, RULE_term = 2, RULE_exp = 3, 
-		RULE_op = 4, RULE_op2 = 5, RULE_operatorTerm = 6, RULE_simpleTerm = 7, 
-		RULE_list_term = 8, RULE_curly_term = 9, RULE_compound = 10, RULE_name = 11, 
-		RULE_variable = 12, RULE_integer = 13, RULE_float_number = 14, RULE_char_code_list = 15, 
-		RULE_open = 16, RULE_open_ct = 17, RULE_close = 18, RULE_open_list = 19, 
-		RULE_close_list = 20, RULE_open_curly = 21, RULE_close_curly = 22, RULE_ht_sep = 23, 
-		RULE_comma = 24, RULE_end = 25;
+		RULE_readTerm = 0, RULE_readTermEof = 1, RULE_term = 2, RULE_operatorTerm = 3, 
+		RULE_exp = 4, RULE_op = 5, RULE_op2 = 6, RULE_simpleTerm = 7, RULE_list_term = 8, 
+		RULE_curly_term = 9, RULE_compound = 10, RULE_name = 11, RULE_variable = 12, 
+		RULE_integer = 13, RULE_float_number = 14, RULE_char_code_list = 15, RULE_open = 16, 
+		RULE_open_ct = 17, RULE_close = 18, RULE_open_list = 19, RULE_close_list = 20, 
+		RULE_open_curly = 21, RULE_close_curly = 22, RULE_ht_sep = 23, RULE_comma = 24, 
+		RULE_end = 25;
 	public static final String[] ruleNames = {
-		"readTerm", "readTermEof", "term", "exp", "op", "op2", "operatorTerm", 
+		"readTerm", "readTermEof", "term", "operatorTerm", "exp", "op", "op2", 
 		"simpleTerm", "list_term", "curly_term", "compound", "name", "variable", 
 		"integer", "float_number", "char_code_list", "open", "open_ct", "close", 
 		"open_list", "close_list", "open_curly", "close_curly", "ht_sep", "comma", 
@@ -96,138 +97,129 @@ public class TermParser extends Parser {
 	public ATN getATN() { return _ATN; }
 
 
-	//For Testing
-	public void printer()
-	{   
-	    System.out.println(_input.LT(1).getText());
-	    System.out.println(_input.LT(2).getText());
-	    System.out.println(_input.LT(3).getText());
-	    System.out.println(_input.LT(4).getText());
-	    System.out.println(_input.LT(5).getText());
-	    System.out.println(_input.LA(1));
-	    System.out.println(_input.LA(2));
-	    System.out.println(_input.LA(3));
-	    System.out.println(_input.LA(4));
-	    System.out.println(_input.LA(5));
-	}
-	 
-	//Reader stream that acts as an interface between the project and the parser 
-	ReaderCharStream stream;
-	//Defining the environment the user specifies
+	//Defining the Prolog environment in which the user works
 	protected Environment environment;
 	 
+	//Return the line number of the last character of the next token to be consumed
+	//Line numbering starts from 1
 	public int getCurrentLine()
+	{
+	    if (_input.LT(2).getCharPositionInLine() == 0) 
 	    {
-	        return stream.getEndLine();
+	        return _input.LT(2).getLine() - 1;
 	    }
-
+	    else return _input.LT(2).getLine();
+	}
+	 
+	//Have to find an alternative as no method in ANTLR to get the column number 
 	public int getCurrentColumn()
-	    {
-	        return stream.getEndColumn();
-	    } 
+	{
+	    return 1;
+	} 
 	 
 	public boolean isFunctor()
-	    {
-	        return _input.LA(1) == TermParser.NAME_TOKEN &&
-	        _input.LA(2) == TermParser.OPEN_TOKEN;
-	    }
+	{
+	    return _input.LA(1) == TermParser.NAME_TOKEN &&
+	    _input.LA(2) == TermParser.OPEN_TOKEN;
+	}
 	  
 	boolean testOp(ReadOptions Options, int i)
-	    {
-	        Token tk = _input.LT(i);
-	        NameToken ntk = new NameToken(tk);
-	        return ntk.isOperator(Options.operatorSet);
-	    }
+	{
+	    Token tk = _input.LT(i);
+	    NameToken ntk = new NameToken(tk);
+	    return ntk.isOperator(Options.operatorSet);
+	}
 
 	boolean testNoOp (ReadOptions Options)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return ntk.isNonOperator(Options.operatorSet);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return ntk.isNonOperator(Options.operatorSet);
+	}
 
 	boolean testFX (ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return !isFunctor() && ntk.isFxOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return !isFunctor() && ntk.isFxOperator(Options.operatorSet, priority);
+	}
 
 	boolean testFY (ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return !isFunctor() && ntk.isFyOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return !isFunctor() && ntk.isFyOperator(Options.operatorSet, priority);
+	}
 
 	boolean testXFX(ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return ntk.isXfxOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return ntk.isXfxOperator(Options.operatorSet, priority);
+	}
 
 	boolean testXFY(ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        int tk_name = _input.LA(1);
-	        return priority >= Options.operatorSet.getCommaLevel() && tk_name == COMMA_TOKEN  ||
-	               ntk.isXfyOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    int tk_name = _input.LA(1);
+	    return 
+	    priority >= Options.operatorSet.getCommaLevel() && tk_name == COMMA_TOKEN  
+	    ||
+	    ntk.isXfyOperator(Options.operatorSet, priority);
+	}
 
 	boolean testYFX(ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return ntk.isYfxOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return ntk.isYfxOperator(Options.operatorSet, priority);
+	}
 
 	boolean testXF (ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return ntk.isXfOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return ntk.isXfOperator(Options.operatorSet, priority);
+	}
 
 	boolean testYF (ReadOptions Options, int priority)
-	    {
-	        Token tk = _input.LT(1);
-	        NameToken ntk = new NameToken(tk);
-	        return ntk.isYfOperator(Options.operatorSet,priority);
-	    }
+	{
+	    Token tk = _input.LT(1);
+	    NameToken ntk = new NameToken(tk);
+	    return ntk.isYfOperator(Options.operatorSet, priority);
+	}
 	  
 	public boolean isExpSeparator(int i)
+	{
+	    switch (_input.LA(i))
 	    {
-	        Token tk = _input.LT(i);
-	        switch (_input.LA(i))
-	        {
-	            case COMMA_TOKEN              :
-	            case CLOSE_TOKEN              :
-	            case CLOSE_CURLY_TOKEN        :
-	            case CLOSE_LIST_TOKEN         :
-	            case END_TOKEN                :
-	            case EOF                      :
-	            case HEAD_TAIL_SEPARATOR_TOKEN:
-	                return true;
-	            default:
-	                return false;
-	        }
+	        case COMMA_TOKEN              :
+	        case CLOSE_TOKEN              :
+	        case CLOSE_CURLY_TOKEN        :
+	        case CLOSE_LIST_TOKEN         :
+	        case END_TOKEN                :
+	        case EOF                      :
+	        case HEAD_TAIL_SEPARATOR_TOKEN:
+	            return true;
+	        default:
+	            return false;
 	    }
+	}
 	  
 	boolean is1201Separator(int i)
+	{
+	    switch (_input.LA(i))
 	    {
-	        switch (_input.LA(i))
-	        {
-	            case CLOSE_TOKEN              :
-	            case CLOSE_CURLY_TOKEN        :
-	            case END_TOKEN                :
-	            case EOF                      :
-	                return true;
-	            default:
-	                return false;
-	        }
+	        case CLOSE_TOKEN              :
+	        case CLOSE_CURLY_TOKEN        :
+	        case END_TOKEN                :
+	        case EOF                      :
+	            return true;
+	        default:
+	            return false;
 	    }
+	}
 
 	Term createTerm(CompoundTermTag op, Term t)
 	{
@@ -239,13 +231,13 @@ public class TermParser extends Parser {
 	} 
 	    
 	Term createTerm(CompoundTermTag op, Term t1, Term t2)
-	    {
+	{
 	    if (op.arity != 2)
 	    {
 	        throw new IllegalArgumentException("Arity of term tag must be 2");
 	    }
 	    return new CompoundTerm(op, new Term[]{t1,t2});
-	    }
+	}
 	    
 	void skipToDot()
 	{
@@ -261,6 +253,22 @@ public class TermParser extends Parser {
 	    {
 	        consume();
 	    }
+	}
+
+	public TermParser(java.io.Reader r, int line, int col, Environment env) throws IOException
+	{
+	    this(new ANTLRInputStream(r));
+	    environment = env; 
+	}
+		
+	public TermParser(ANTLRInputStream input)
+	{
+	    this(new TermLexer(input));
+	}
+		
+	public TermParser(TermLexer lexer)
+	{
+	    this(new CommonTokenStream(lexer));
 	}
 
 	public TermParser(TokenStream input) {
@@ -298,29 +306,28 @@ public class TermParser extends Parser {
 
 		    ((ReadTermContext)_localctx).t =  null;
 
+		int _la;
 		try {
-			setState(58);
+			setState(57);
 			switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(52); match(EOF);
+				setState(52);
+				_la = _input.LA(1);
+				if ( !(_la==EOF || _la==END_TOKEN) ) {
+				_errHandler.recoverInline(this);
+				}
+				consume();
 				}
 				break;
 
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(53); match(END_TOKEN);
-				}
-				break;
-
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(54); ((ReadTermContext)_localctx).a = term(_localctx.Options, _localctx.Options.operatorSet.getMaxLevel());
+				setState(53); ((ReadTermContext)_localctx).a = term(_localctx.Options, _localctx.Options.operatorSet.getMaxLevel());
 				((ReadTermContext)_localctx).t =  ((ReadTermContext)_localctx).a.t;
-				setState(56); end();
+				setState(55); end();
 				}
 				break;
 			}
@@ -366,9 +373,9 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(60); ((ReadTermEofContext)_localctx).a = term(_localctx.Options, _localctx.Options.operatorSet.getMaxLevel());
+			setState(59); ((ReadTermEofContext)_localctx).a = term(_localctx.Options, _localctx.Options.operatorSet.getMaxLevel());
 			((ReadTermEofContext)_localctx).t =  ((ReadTermEofContext)_localctx).a.t;
-			setState(62); match(EOF);
+			setState(61); match(EOF);
 			}
 		}
 		catch (RecognitionException re) {
@@ -388,8 +395,12 @@ public class TermParser extends Parser {
 		public Term t;
 		public boolean pIs1201;
 		public boolean pIsZero;
+		public int p;
 		public SimpleTermContext a;
 		public NameContext b;
+		public OperatorTermContext operatorTerm() {
+			return getRuleContext(OperatorTermContext.class,0);
+		}
 		public SimpleTermContext simpleTerm() {
 			return getRuleContext(SimpleTermContext.class,0);
 		}
@@ -413,12 +424,13 @@ public class TermParser extends Parser {
 	public final TermContext term(ReadOptions Options,int priority) throws RecognitionException {
 		TermContext _localctx = new TermContext(_ctx, getState(), Options, priority);
 		enterRule(_localctx, 4, RULE_term);
-		   int p = 0;
-		    p = _localctx.Options.operatorSet.getNextLevel(_localctx.priority);
+		   ((TermContext)_localctx).p =  0;
+		    ((TermContext)_localctx).p =  _localctx.Options.operatorSet.getNextLevel(_localctx.priority);
 		    ((TermContext)_localctx).t =  null;
+		    CompoundTermTag f = null;
 		    ((TermContext)_localctx).pIs1201 =  false;
 		    ((TermContext)_localctx).pIsZero =  false;
-		    if (p == 0)
+		    if (_localctx.p == 0)
 		    {
 		        ((TermContext)_localctx).pIsZero =  true;
 		    }
@@ -428,10 +440,16 @@ public class TermParser extends Parser {
 		    }
 
 		try {
-			setState(73);
+			setState(74);
 			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
+				{
+				}
+				break;
+
+			case 2:
+				enterOuterAlt(_localctx, 2);
 				{
 				setState(64);
 				if (!(_localctx.pIsZero)) throw new FailedPredicateException(this, "$pIsZero");
@@ -442,8 +460,8 @@ public class TermParser extends Parser {
 				}
 				break;
 
-			case 2:
-				enterOuterAlt(_localctx, 2);
+			case 3:
+				enterOuterAlt(_localctx, 3);
 				{
 				setState(68);
 				if (!(_localctx.pIs1201)) throw new FailedPredicateException(this, "$pIs1201");
@@ -453,6 +471,290 @@ public class TermParser extends Parser {
 
 				            ((TermContext)_localctx).t =  ((TermContext)_localctx).b.alpha;
 				          
+				}
+				break;
+
+			case 4:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(73); operatorTerm(_localctx.Options, _localctx.priority);
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class OperatorTermContext extends ParserRuleContext {
+		public ReadOptions Options;
+		public int priority;
+		public Term t;
+		public int token_name;
+		public Token token;
+		public OpContext a;
+		public TermContext b;
+		public OpContext d;
+		public TermContext e;
+		public Op2Context h;
+		public TermContext i;
+		public Op2Context j;
+		public Op2Context k;
+		public TermContext l;
+		public Op2Context m;
+		public TermContext n;
+		public Op2Context o;
+		public List<Op2Context> op2() {
+			return getRuleContexts(Op2Context.class);
+		}
+		public TermContext term() {
+			return getRuleContext(TermContext.class,0);
+		}
+		public TerminalNode INTEGER_TOKEN() { return getToken(TermParser.INTEGER_TOKEN, 0); }
+		public TerminalNode FLOAT_NUMBER_TOKEN() { return getToken(TermParser.FLOAT_NUMBER_TOKEN, 0); }
+		public OpContext op() {
+			return getRuleContext(OpContext.class,0);
+		}
+		public Op2Context op2(int i) {
+			return getRuleContext(Op2Context.class,i);
+		}
+		public OperatorTermContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
+		public OperatorTermContext(ParserRuleContext parent, int invokingState, ReadOptions Options, int priority) {
+			super(parent, invokingState);
+			this.Options = Options;
+			this.priority = priority;
+		}
+		@Override public int getRuleIndex() { return RULE_operatorTerm; }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof TermVisitor ) return ((TermVisitor<? extends T>)visitor).visitOperatorTerm(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+
+	public final OperatorTermContext operatorTerm(ReadOptions Options,int priority) throws RecognitionException {
+		OperatorTermContext _localctx = new OperatorTermContext(_ctx, getState(), Options, priority);
+		enterRule(_localctx, 6, RULE_operatorTerm);
+
+		    ((OperatorTermContext)_localctx).token_name =  0;
+		    ((OperatorTermContext)_localctx).token =  null;
+		    int p = _localctx.priority;
+		    Term t2 = null;
+		    ((OperatorTermContext)_localctx).t =  null;
+		    CompoundTermTag f = null;
+
+		try {
+			int _alt;
+			setState(143);
+			switch ( getInterpreter().adaptivePredict(_input,8,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(76);
+				if (!(testFY(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testFY($Options, $priority)");
+				setState(77); ((OperatorTermContext)_localctx).a = op(_localctx.Options, p);
+				f = ((OperatorTermContext)_localctx).a.tag;
+				setState(79); ((OperatorTermContext)_localctx).b = term(_localctx.Options, p);
+				((OperatorTermContext)_localctx).t =  ((OperatorTermContext)_localctx).b.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t);
+				}
+				break;
+
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(82);
+				if (!(testFX(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testFX($Options, $priority)");
+				setState(83); ((OperatorTermContext)_localctx).d = op(_localctx.Options, p);
+				f = ((OperatorTermContext)_localctx).d.tag;
+				setState(85); ((OperatorTermContext)_localctx).e = term(_localctx.Options, p-1);
+				((OperatorTermContext)_localctx).t =  ((OperatorTermContext)_localctx).e.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t);
+				}
+				break;
+
+			case 3:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(141);
+				switch ( getInterpreter().adaptivePredict(_input,7,_ctx) ) {
+				case 1:
+					{
+					setState(88);
+					if (!(testXFX(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testXFX($Options, $priority)");
+					setState(89); ((OperatorTermContext)_localctx).h = op2(_localctx.Options, p);
+					f = ((OperatorTermContext)_localctx).h.tag;
+					setState(91); ((OperatorTermContext)_localctx).i = term(_localctx.Options, p-1);
+					t2 = ((OperatorTermContext)_localctx).i.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t, t2);
+					}
+					break;
+
+				case 2:
+					{
+					setState(94);
+					if (!(testXF(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testXF($Options, $priority)");
+					setState(95); ((OperatorTermContext)_localctx).j = op2(_localctx.Options, p);
+					f = ((OperatorTermContext)_localctx).j.tag; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t);
+					}
+					break;
+
+				case 3:
+					{
+					setState(98);
+					if (!(testXFY(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testXFY($Options, $priority)");
+					setState(99); ((OperatorTermContext)_localctx).k = op2(_localctx.Options, p);
+					f = ((OperatorTermContext)_localctx).k.tag;
+					setState(101); ((OperatorTermContext)_localctx).l = term(_localctx.Options, p);
+					t2 = ((OperatorTermContext)_localctx).l.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t, t2);
+					}
+					break;
+
+				case 4:
+					{
+					setState(139);
+					switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
+					case 1:
+						{
+						((OperatorTermContext)_localctx).token_name =  _input.LA(1); ((OperatorTermContext)_localctx).token =  _input.LT(1);
+						setState(136);
+						if (!((_localctx.token_name == INTEGER_TOKEN || _localctx.token_name == FLOAT_NUMBER_TOKEN))) throw new FailedPredicateException(this, "($token_name == INTEGER_TOKEN || $token_name == FLOAT_NUMBER_TOKEN)");
+						{
+						setState(138);
+						if (!(_localctx.token.getText().charAt(0) == '-')) throw new FailedPredicateException(this, "$token.getText().charAt(0) == '-'");
+						{
+						setState(140);
+						if (!(_localctx.Options.operatorSet.lookupXf("-") == Operator.nonOperator)) throw new FailedPredicateException(this, "$Options.operatorSet.lookupXf(\"-\") == Operator.nonOperator");
+						}
+						}
+						}
+						break;
+
+					case 2:
+						{
+						setState(109); 
+						_errHandler.sync(this);
+						_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
+						do {
+							switch (_alt) {
+							case 1:
+								{
+								{
+								setState(105);
+								if (!(_localctx.token_name == INTEGER_TOKEN)) throw new FailedPredicateException(this, "$token_name == INTEGER_TOKEN");
+								setState(106);
+								if (!(_localctx.token.getText().charAt(0) == '-')) throw new FailedPredicateException(this, "$token.getText().charAt(0) == '-'");
+								setState(107); match(INTEGER_TOKEN);
+
+								                    ((OperatorTermContext)_localctx).t =  createTerm(CompoundTermTag.minus2,_localctx.t,IntegerTerm.get(-(IntegerTerm.get(_localctx.token.getText()).value)));
+								                
+								}
+								}
+								break;
+							default:
+								throw new NoViableAltException(this);
+							}
+							setState(111); 
+							_errHandler.sync(this);
+							_alt = getInterpreter().adaptivePredict(_input,2,_ctx);
+						} while ( _alt!=2 && _alt!=-1 );
+						}
+						break;
+
+					case 3:
+						{
+						setState(117); 
+						_errHandler.sync(this);
+						_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
+						do {
+							switch (_alt) {
+							case 1:
+								{
+								{
+								setState(113);
+								if (!(_localctx.token_name == FLOAT_NUMBER_TOKEN)) throw new FailedPredicateException(this, "$token_name == FLOAT_NUMBER_TOKEN");
+								setState(114);
+								if (!(_localctx.token.getText().charAt(0) == '-')) throw new FailedPredicateException(this, "$token.getText().charAt(0) == '-'");
+								setState(115); match(FLOAT_NUMBER_TOKEN);
+
+								                    ((OperatorTermContext)_localctx).t =  createTerm(CompoundTermTag.minus2,_localctx.t,new FloatTerm(-(new FloatTerm(_localctx.token.getText()).value)));
+								                
+								}
+								}
+								break;
+							default:
+								throw new NoViableAltException(this);
+							}
+							setState(119); 
+							_errHandler.sync(this);
+							_alt = getInterpreter().adaptivePredict(_input,3,_ctx);
+						} while ( _alt!=2 && _alt!=-1 );
+						}
+						break;
+
+					case 4:
+						{
+						setState(127); 
+						_errHandler.sync(this);
+						_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+						do {
+							switch (_alt) {
+							case 1:
+								{
+								{
+								setState(121);
+								if (!(testYFX(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testYFX($Options, $priority)");
+								setState(122); ((OperatorTermContext)_localctx).m = op2(_localctx.Options, p);
+								f = ((OperatorTermContext)_localctx).m.tag;
+								setState(124); ((OperatorTermContext)_localctx).n = term(_localctx.Options, p-1);
+								t2 = ((OperatorTermContext)_localctx).n.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t, t2);
+								}
+								}
+								break;
+							default:
+								throw new NoViableAltException(this);
+							}
+							setState(129); 
+							_errHandler.sync(this);
+							_alt = getInterpreter().adaptivePredict(_input,4,_ctx);
+						} while ( _alt!=2 && _alt!=-1 );
+						}
+						break;
+
+					case 5:
+						{
+						setState(135); 
+						_errHandler.sync(this);
+						_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
+						do {
+							switch (_alt) {
+							case 1:
+								{
+								{
+								setState(131);
+								if (!(testYF(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testYF($Options, $priority)");
+								setState(132); ((OperatorTermContext)_localctx).o = op2(_localctx.Options, p);
+								((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t);
+								}
+								}
+								break;
+							default:
+								throw new NoViableAltException(this);
+							}
+							setState(137); 
+							_errHandler.sync(this);
+							_alt = getInterpreter().adaptivePredict(_input,5,_ctx);
+						} while ( _alt!=2 && _alt!=-1 );
+						}
+						break;
+					}
+					}
+					break;
+				}
 				}
 				break;
 			}
@@ -494,21 +796,21 @@ public class TermParser extends Parser {
 
 	public final ExpContext exp(ReadOptions Options) throws RecognitionException {
 		ExpContext _localctx = new ExpContext(_ctx, getState(), Options);
-		enterRule(_localctx, 6, RULE_exp);
+		enterRule(_localctx, 8, RULE_exp);
 
 		    ((ExpContext)_localctx).t =  null;
 
 		try {
-			setState(83);
-			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
+			setState(153);
+			switch ( getInterpreter().adaptivePredict(_input,9,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(75);
+				setState(145);
 				if (!(testOp(_localctx.Options, 1))) throw new FailedPredicateException(this, "testOp($Options, 1)");
-				setState(76);
+				setState(146);
 				if (!(isExpSeparator(2))) throw new FailedPredicateException(this, "isExpSeparator(2)");
-				setState(77); ((ExpContext)_localctx).a = name();
+				setState(147); ((ExpContext)_localctx).a = name();
 				((ExpContext)_localctx).t =  ((ExpContext)_localctx).a.alpha;
 				}
 				break;
@@ -516,7 +818,7 @@ public class TermParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(80); ((ExpContext)_localctx).b = term(_localctx.Options, _localctx.Options.operatorSet.getCommaLevel()-1);
+				setState(150); ((ExpContext)_localctx).b = term(_localctx.Options, _localctx.Options.operatorSet.getCommaLevel()-1);
 				((ExpContext)_localctx).t =  ((ExpContext)_localctx).b.t;
 				}
 				break;
@@ -555,18 +857,20 @@ public class TermParser extends Parser {
 
 	public final OpContext op(ReadOptions Options,int priority) throws RecognitionException {
 		OpContext _localctx = new OpContext(_ctx, getState(), Options, priority);
-		enterRule(_localctx, 8, RULE_op);
+		enterRule(_localctx, 10, RULE_op);
 
 		    ((OpContext)_localctx).tag =  null;
 
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(85); ((OpContext)_localctx).NAME_TOKEN = match(NAME_TOKEN);
+			setState(155); ((OpContext)_localctx).NAME_TOKEN = match(NAME_TOKEN);
 
-			            NameToken tk = (NameToken)((OpContext)_localctx).NAME_TOKEN; 
-			            ((OpContext)_localctx).tag =  tk.fxOp.tag;
-			        
+			        Token tk = ((OpContext)_localctx).NAME_TOKEN; 
+			        NameToken ntk = new NameToken(tk);
+			        ntk.isFxOperator(Options.operatorSet, priority);
+			        ((OpContext)_localctx).tag =  ntk.fxOp.tag;
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -605,124 +909,35 @@ public class TermParser extends Parser {
 
 	public final Op2Context op2(ReadOptions Options,int priority) throws RecognitionException {
 		Op2Context _localctx = new Op2Context(_ctx, getState(), Options, priority);
-		enterRule(_localctx, 10, RULE_op2);
+		enterRule(_localctx, 12, RULE_op2);
 
 		    ((Op2Context)_localctx).tag =  null;
 
 		try {
-			setState(95);
-			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
+			setState(165);
+			switch ( getInterpreter().adaptivePredict(_input,10,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(88);
+				setState(158);
 				if (!(_localctx.priority >= 1000)) throw new FailedPredicateException(this, "$priority >= 1000");
-				setState(89);
+				setState(159);
 				if (!(getCurrentToken().getType() == COMMA_TOKEN)) throw new FailedPredicateException(this, "getCurrentToken().getType() == COMMA_TOKEN");
-				setState(90); comma();
-
-				            ((Op2Context)_localctx).tag =  TermConstants.conjunctionTag;
-				        
+				setState(160); comma();
+				((Op2Context)_localctx).tag =  TermConstants.conjunctionTag;
 				}
 				break;
 
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(93); ((Op2Context)_localctx).NAME_TOKEN = match(NAME_TOKEN);
+				setState(163); ((Op2Context)_localctx).NAME_TOKEN = match(NAME_TOKEN);
 
-				            NameToken tk = (NameToken)((Op2Context)_localctx).NAME_TOKEN; 
-				            ((Op2Context)_localctx).tag =  tk.xfOp.tag;
-				        
-				}
-				break;
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	public static class OperatorTermContext extends ParserRuleContext {
-		public ReadOptions Options;
-		public int priority;
-		public Term t;
-		public int token_name;
-		public Token token;
-		public OpContext a;
-		public TermContext b;
-		public OpContext d;
-		public TermContext e;
-		public TermContext g;
-		public TermContext term() {
-			return getRuleContext(TermContext.class,0);
-		}
-		public OpContext op() {
-			return getRuleContext(OpContext.class,0);
-		}
-		public OperatorTermContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
-		public OperatorTermContext(ParserRuleContext parent, int invokingState, ReadOptions Options, int priority) {
-			super(parent, invokingState);
-			this.Options = Options;
-			this.priority = priority;
-		}
-		@Override public int getRuleIndex() { return RULE_operatorTerm; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof TermVisitor ) return ((TermVisitor<? extends T>)visitor).visitOperatorTerm(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-
-	public final OperatorTermContext operatorTerm(ReadOptions Options,int priority) throws RecognitionException {
-		OperatorTermContext _localctx = new OperatorTermContext(_ctx, getState(), Options, priority);
-		enterRule(_localctx, 12, RULE_operatorTerm);
-
-		    ((OperatorTermContext)_localctx).token_name =  0;
-		    ((OperatorTermContext)_localctx).token =  null;
-		    int p = _localctx.priority;
-		    Term t2 = null;
-		    ((OperatorTermContext)_localctx).t =  null;
-		    CompoundTermTag f = null;
-
-		try {
-			setState(112);
-			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
-			case 1:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(97);
-				if (!(testFY(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testFY($Options, $priority)");
-				setState(98); ((OperatorTermContext)_localctx).a = op(_localctx.Options, p);
-				f = ((OperatorTermContext)_localctx).a.tag;
-				setState(100); ((OperatorTermContext)_localctx).b = term(_localctx.Options, p);
-				((OperatorTermContext)_localctx).t =  ((OperatorTermContext)_localctx).b.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t);
-				}
-				break;
-
-			case 2:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(103);
-				if (!(testFX(_localctx.Options, _localctx.priority))) throw new FailedPredicateException(this, "testFX($Options, $priority)");
-				setState(104); ((OperatorTermContext)_localctx).d = op(_localctx.Options, p);
-				f = ((OperatorTermContext)_localctx).d.tag;
-				setState(106); ((OperatorTermContext)_localctx).e = term(_localctx.Options, p-1);
-				((OperatorTermContext)_localctx).t =  ((OperatorTermContext)_localctx).e.t; ((OperatorTermContext)_localctx).t =  createTerm(f, _localctx.t);
-				}
-				break;
-
-			case 3:
-				enterOuterAlt(_localctx, 3);
-				{
-				setState(109); ((OperatorTermContext)_localctx).g = term(_localctx.Options, p-1);
-				((OperatorTermContext)_localctx).t =  ((OperatorTermContext)_localctx).g.t;
+				        Token tk = ((Op2Context)_localctx).NAME_TOKEN; 
+				        NameToken ntk = new NameToken(tk);
+				        ntk.isXfxOperator(Options.operatorSet, priority);
+				        ((Op2Context)_localctx).tag =  ntk.xfOp.tag;
+				    
 				}
 				break;
 			}
@@ -803,83 +1018,83 @@ public class TermParser extends Parser {
 		    ((SimpleTermContext)_localctx).t =  null;
 
 		try {
-			setState(145);
-			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
+			setState(198);
+			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(114);
+				setState(167);
 				if (!(_input.LA(2) == OPEN_TOKEN)) throw new FailedPredicateException(this, "_input.LA(2) == OPEN_TOKEN");
-				setState(115); ((SimpleTermContext)_localctx).a = compound(_localctx.Options);
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).a.rc; System.out.println("compound");
+				setState(168); ((SimpleTermContext)_localctx).a = compound(_localctx.Options);
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).a.rc;
 				}
 				break;
 
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(118);
+				setState(171);
 				if (!(testNoOp(_localctx.Options))) throw new FailedPredicateException(this, "testNoOp($Options)");
-				setState(119); ((SimpleTermContext)_localctx).b = name();
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).b.alpha; System.out.println("name");
+				setState(172); ((SimpleTermContext)_localctx).b = name();
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).b.alpha;
 				}
 				break;
 
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(122); ((SimpleTermContext)_localctx).c = variable(_localctx.Options);
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).c.var; System.out.println("var");
+				setState(175); ((SimpleTermContext)_localctx).c = variable(_localctx.Options);
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).c.var;
 				}
 				break;
 
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(125); ((SimpleTermContext)_localctx).d = integer();
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).d.int_term; System.out.println("int");
+				setState(178); ((SimpleTermContext)_localctx).d = integer();
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).d.int_term;
 				}
 				break;
 
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(128); ((SimpleTermContext)_localctx).e = float_number();
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).e.float_term; System.out.println("float");
+				setState(181); ((SimpleTermContext)_localctx).e = float_number();
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).e.float_term;
 				}
 				break;
 
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(131); ((SimpleTermContext)_localctx).f = list_term(_localctx.Options);
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).f.rc; System.out.println("list");
+				setState(184); ((SimpleTermContext)_localctx).f = list_term(_localctx.Options);
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).f.rc;
 				}
 				break;
 
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(134); ((SimpleTermContext)_localctx).g = curly_term(_localctx.Options);
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).g.curled_term; System.out.println("curly");
+				setState(187); ((SimpleTermContext)_localctx).g = curly_term(_localctx.Options);
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).g.curled_term;
 				}
 				break;
 
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
-				setState(137); ((SimpleTermContext)_localctx).h = char_code_list();
-				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).h.char_term; System.out.println("charcode");
+				setState(190); ((SimpleTermContext)_localctx).h = char_code_list();
+				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).h.char_term;
 				}
 				break;
 
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(140); open();
-				setState(141); ((SimpleTermContext)_localctx).i = term(_localctx.Options, 1201);
+				setState(193); open();
+				setState(194); ((SimpleTermContext)_localctx).i = term(_localctx.Options, 1201);
 				((SimpleTermContext)_localctx).t =  ((SimpleTermContext)_localctx).i.t;
-				setState(143); close();
+				setState(196); close();
 				}
 				break;
 			}
@@ -942,60 +1157,59 @@ public class TermParser extends Parser {
 		    ((List_termContext)_localctx).rc =  null;
 		    Term t1 = null;
 		    Term t2 = null;
-		    
+
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(147); open_list();
-			{
-			setState(148); ((List_termContext)_localctx).a = exp(_localctx.Options);
-
-			                t1 = ((List_termContext)_localctx).a.t;
-			                t1 = createTerm(TermConstants.listTag,t1,null);
-			                ((List_termContext)_localctx).rc =  t1;
-			            
-			System.out.print("[alpha");
-			setState(157);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==COMMA_TOKEN) {
+			setState(200); open_list();
+			setState(216);
+			switch ( getInterpreter().adaptivePredict(_input,13,_ctx) ) {
+			case 1:
 				{
-				{
-				setState(151); comma();
-				setState(152); ((List_termContext)_localctx).b = exp(_localctx.Options);
+				setState(201); ((List_termContext)_localctx).a = exp(_localctx.Options);
 
-				                    t2 = ((List_termContext)_localctx).b.t;
-				                    t2 = createTerm(TermConstants.listTag,t2,null);
-				                    ((CompoundTerm)t1).args[1] = t2;
-				                    t1 = t2;
-				                
-				}
-				}
-				setState(159);
+				            t1 = ((List_termContext)_localctx).a.t;
+				            t1 = createTerm(TermConstants.listTag,t1,null);
+				            ((List_termContext)_localctx).rc =  t1;
+				        
+				setState(209);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			}
-			setState(160); ht_sep();
-			System.out.print("|");
-			setState(162); ((List_termContext)_localctx).c = exp(_localctx.Options);
-			System.out.print("beta");
+				while (_la==COMMA_TOKEN) {
+					{
+					{
+					setState(203); comma();
+					setState(204); ((List_termContext)_localctx).b = exp(_localctx.Options);
 
-			               ((CompoundTerm)t1).args[1] = t2;
-			            
+					                t2 = ((List_termContext)_localctx).b.t;
+					                t2 = createTerm(TermConstants.listTag,t2,null);
+					                ((CompoundTerm)t1).args[1] = t2;
+					                t1 = t2;
+					            
+					}
+					}
+					setState(211);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				setState(212); ht_sep();
+				setState(213); ((List_termContext)_localctx).c = exp(_localctx.Options);
+				((CompoundTerm)t1).args[1] = t2;
+				}
+				break;
 			}
-			setState(166); close_list();
-			System.out.print("]");
+			setState(218); close_list();
 
-			            if (_localctx.rc == null)
-			            {
-			                ((List_termContext)_localctx).rc =  TermConstants.emptyListAtom;
-			            }
-			            if (((CompoundTerm)t1).args[1] == null)
-			            {
-			                ((CompoundTerm)t1).args[1] = TermConstants.emptyListAtom;
-			            }
-			        
+			        if (_localctx.rc == null)
+			        {
+			            ((List_termContext)_localctx).rc =  TermConstants.emptyListAtom;
+			        }
+			        if (((CompoundTerm)t1).args[1] == null)
+			        {
+			            ((CompoundTerm)t1).args[1] = TermConstants.emptyListAtom;
+			        }
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -1045,24 +1259,24 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(170); open_curly();
+			setState(221); open_curly();
 			{
 			}
-			setState(172); ((Curly_termContext)_localctx).a = term(_localctx.Options, 1201);
-			setState(173); close_curly();
+			setState(223); ((Curly_termContext)_localctx).a = term(_localctx.Options, 1201);
+			setState(224); close_curly();
 			{
 			}
 
-			            t = ((Curly_termContext)_localctx).a.t;
-			            if (t == null)
-			            {
-			                ((Curly_termContext)_localctx).curled_term =  TermConstants.emptyCurlyAtom;
-			            }
-			            else
-			            {
-			                ((Curly_termContext)_localctx).curled_term =  createTerm(CompoundTermTag.curly1, t);
-			            }
-			        
+			        t = ((Curly_termContext)_localctx).a.t;
+			        if (t == null)
+			        {
+			            ((Curly_termContext)_localctx).curled_term =  TermConstants.emptyCurlyAtom;
+			        }
+			        else
+			        {
+			            ((Curly_termContext)_localctx).curled_term =  createTerm(CompoundTermTag.curly1, t);
+			        }
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -1129,35 +1343,35 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(177); ((CompoundContext)_localctx).a = name();
+			setState(228); ((CompoundContext)_localctx).a = name();
 			functor = ((CompoundContext)_localctx).a.alpha;
-			setState(179); open_ct();
-			setState(180); ((CompoundContext)_localctx).b = exp(_localctx.Options);
+			setState(230); open_ct();
+			setState(231); ((CompoundContext)_localctx).b = exp(_localctx.Options);
 			e1 = ((CompoundContext)_localctx).b.t; args.add(e1);
-			setState(188);
+			setState(239);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==COMMA_TOKEN) {
 				{
 				{
-				setState(182); comma();
-				setState(183); ((CompoundContext)_localctx).x = exp(_localctx.Options);
+				setState(233); comma();
+				setState(234); ((CompoundContext)_localctx).x = exp(_localctx.Options);
 				e1 = ((CompoundContext)_localctx).x.t; args.add(e1);
 				}
 				}
-				setState(190);
+				setState(241);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(191); close();
+			setState(242); close();
 
-			                int n = args.size();
-			                ((CompoundContext)_localctx).rc =  new CompoundTerm(functor,n);
-			                for (int i=0; i<n; i++)
-			                {
-			                    _localctx.rc.args[i] = args.get(i);
-			                }
-			          
+			        int n = args.size();
+			        ((CompoundContext)_localctx).rc =  new CompoundTerm(functor,n);
+			        for (int i=0; i<n; i++)
+			        {
+			            _localctx.rc.args[i] = args.get(i);
+			        }
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -1195,7 +1409,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(194); ((NameContext)_localctx).NAME_TOKEN = match(NAME_TOKEN);
+			setState(245); ((NameContext)_localctx).NAME_TOKEN = match(NAME_TOKEN);
 			((NameContext)_localctx).alpha =  AtomTerm.get((((NameContext)_localctx).NAME_TOKEN!=null?((NameContext)_localctx).NAME_TOKEN.getText():null));
 			}
 		}
@@ -1237,24 +1451,24 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(197); ((VariableContext)_localctx).VARIABLE_TOKEN = match(VARIABLE_TOKEN);
+			setState(248); ((VariableContext)_localctx).VARIABLE_TOKEN = match(VARIABLE_TOKEN);
 
-			            ((VariableContext)_localctx).var =  _localctx.Options.variableNames.get((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null));
-			            if (_localctx.var == null)
-			            {
+			        ((VariableContext)_localctx).var =  _localctx.Options.variableNames.get((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null));
+			        if (_localctx.var == null)
+			        {
 			            ((VariableContext)_localctx).var =  new VariableTerm((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null));
 			            if (!"_".equals((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null)))
 			            {
 			                _localctx.Options.variableNames.put((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null), _localctx.var);
 			                _localctx.Options.singletons.put((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null), _localctx.var);
 			            }
-			                _localctx.Options.variables.add(_localctx.var);
-			            }
-			            else
-			            {
-			                _localctx.Options.singletons.remove((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null));
-			            }
-			        
+			            _localctx.Options.variables.add(_localctx.var);
+			        }
+			        else
+			        {
+			            _localctx.Options.singletons.remove((((VariableContext)_localctx).VARIABLE_TOKEN!=null?((VariableContext)_localctx).VARIABLE_TOKEN.getText():null));
+			        }
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -1292,7 +1506,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(200); ((IntegerContext)_localctx).INTEGER_TOKEN = match(INTEGER_TOKEN);
+			setState(251); ((IntegerContext)_localctx).INTEGER_TOKEN = match(INTEGER_TOKEN);
 			((IntegerContext)_localctx).int_term =  IntegerTerm.get((((IntegerContext)_localctx).INTEGER_TOKEN!=null?((IntegerContext)_localctx).INTEGER_TOKEN.getText():null));
 			}
 		}
@@ -1331,7 +1545,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(203); ((Float_numberContext)_localctx).FLOAT_NUMBER_TOKEN = match(FLOAT_NUMBER_TOKEN);
+			setState(254); ((Float_numberContext)_localctx).FLOAT_NUMBER_TOKEN = match(FLOAT_NUMBER_TOKEN);
 			((Float_numberContext)_localctx).float_term =  new FloatTerm((((Float_numberContext)_localctx).FLOAT_NUMBER_TOKEN!=null?((Float_numberContext)_localctx).FLOAT_NUMBER_TOKEN.getText():null));
 			}
 		}
@@ -1370,24 +1584,24 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(206); ((Char_code_listContext)_localctx).CHAR_CODE_LIST_TOKEN = match(CHAR_CODE_LIST_TOKEN);
+			setState(257); ((Char_code_listContext)_localctx).CHAR_CODE_LIST_TOKEN = match(CHAR_CODE_LIST_TOKEN);
 
-			            String val = TermParserUtils.convertQuotedString((((Char_code_listContext)_localctx).CHAR_CODE_LIST_TOKEN!=null?((Char_code_listContext)_localctx).CHAR_CODE_LIST_TOKEN.getText():null),'\"');
-			            // Get the Atom form
-			            AtomTerm atomValue = AtomTerm.get(val);
-			            int i,n = val.length();
-			            //get the codes form and chars form with one loop
-			            Term codesValue = TermConstants.emptyListAtom;
-			            char[] valChars = val.toCharArray();
-			            AtomTerm[] valAtoms = new AtomTerm[valChars.length];
-			            for (i=n-1; i>=0; --i)
-			            {
-			                codesValue = CompoundTerm.getList(IntegerTerm.get(val.charAt(i)), codesValue);
-			                valAtoms[i] = AtomTerm.get(valChars[i]);
-			            }
-			            Term charsValue = CompoundTerm.getList(valAtoms);
-			            ((Char_code_listContext)_localctx).char_term =  new DoubleQuotesTerm(environment, codesValue, charsValue, atomValue);
-			        
+			        String val = TermParserUtils.convertQuotedString((((Char_code_listContext)_localctx).CHAR_CODE_LIST_TOKEN!=null?((Char_code_listContext)_localctx).CHAR_CODE_LIST_TOKEN.getText():null),'\"');
+			        // Get the Atom form
+			        AtomTerm atomValue = AtomTerm.get(val);
+			        int i,n = val.length();
+			        //get the codes form and chars form with one loop
+			        Term codesValue = TermConstants.emptyListAtom;
+			        char[] valChars = val.toCharArray();
+			        AtomTerm[] valAtoms = new AtomTerm[valChars.length];
+			        for (i=n-1; i>=0; --i)
+			        {
+			            codesValue = CompoundTerm.getList(IntegerTerm.get(val.charAt(i)), codesValue);
+			            valAtoms[i] = AtomTerm.get(valChars[i]);
+			        }
+			        Term charsValue = CompoundTerm.getList(valAtoms);
+			        ((Char_code_listContext)_localctx).char_term =  new DoubleQuotesTerm(environment, codesValue, charsValue, atomValue);
+			    
 			}
 		}
 		catch (RecognitionException re) {
@@ -1420,7 +1634,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(209); match(OPEN_TOKEN);
+			setState(260); match(OPEN_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1453,7 +1667,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(211); match(OPEN_TOKEN);
+			setState(262); match(OPEN_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1486,7 +1700,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(213); match(CLOSE_TOKEN);
+			setState(264); match(CLOSE_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1519,7 +1733,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(215); match(OPEN_LIST_TOKEN);
+			setState(266); match(OPEN_LIST_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1552,7 +1766,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(217); match(CLOSE_LIST_TOKEN);
+			setState(268); match(CLOSE_LIST_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1585,7 +1799,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(219); match(OPEN_CURLY_TOKEN);
+			setState(270); match(OPEN_CURLY_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1618,7 +1832,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(221); match(CLOSE_CURLY_TOKEN);
+			setState(272); match(CLOSE_CURLY_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1651,7 +1865,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(223); match(HEAD_TAIL_SEPARATOR_TOKEN);
+			setState(274); match(HEAD_TAIL_SEPARATOR_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1684,7 +1898,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(225); match(COMMA_TOKEN);
+			setState(276); match(COMMA_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1717,7 +1931,7 @@ public class TermParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(227); match(END_TOKEN);
+			setState(278); match(END_TOKEN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1735,11 +1949,11 @@ public class TermParser extends Parser {
 		switch (ruleIndex) {
 		case 2: return term_sempred((TermContext)_localctx, predIndex);
 
-		case 3: return exp_sempred((ExpContext)_localctx, predIndex);
+		case 3: return operatorTerm_sempred((OperatorTermContext)_localctx, predIndex);
 
-		case 5: return op2_sempred((Op2Context)_localctx, predIndex);
+		case 4: return exp_sempred((ExpContext)_localctx, predIndex);
 
-		case 6: return operatorTerm_sempred((OperatorTermContext)_localctx, predIndex);
+		case 6: return op2_sempred((Op2Context)_localctx, predIndex);
 
 		case 7: return simpleTerm_sempred((SimpleTermContext)_localctx, predIndex);
 		}
@@ -1747,25 +1961,49 @@ public class TermParser extends Parser {
 	}
 	private boolean op2_sempred(Op2Context _localctx, int predIndex) {
 		switch (predIndex) {
-		case 5: return _localctx.priority >= 1000;
+		case 19: return _localctx.priority >= 1000;
 
-		case 6: return getCurrentToken().getType() == COMMA_TOKEN;
+		case 20: return getCurrentToken().getType() == COMMA_TOKEN;
 		}
 		return true;
 	}
 	private boolean exp_sempred(ExpContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 3: return testOp(_localctx.Options, 1);
+		case 17: return testOp(_localctx.Options, 1);
 
-		case 4: return isExpSeparator(2);
+		case 18: return isExpSeparator(2);
 		}
 		return true;
 	}
 	private boolean operatorTerm_sempred(OperatorTermContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 7: return testFY(_localctx.Options, _localctx.priority);
+		case 16: return testYF(_localctx.Options, _localctx.priority);
 
-		case 8: return testFX(_localctx.Options, _localctx.priority);
+		case 3: return testFY(_localctx.Options, _localctx.priority);
+
+		case 4: return testFX(_localctx.Options, _localctx.priority);
+
+		case 5: return testXFX(_localctx.Options, _localctx.priority);
+
+		case 6: return testXF(_localctx.Options, _localctx.priority);
+
+		case 7: return testXFY(_localctx.Options, _localctx.priority);
+
+		case 8: return (_localctx.token_name == INTEGER_TOKEN || _localctx.token_name == FLOAT_NUMBER_TOKEN);
+
+		case 9: return _localctx.token.getText().charAt(0) == '-';
+
+		case 10: return _localctx.Options.operatorSet.lookupXf("-") == Operator.nonOperator;
+
+		case 11: return _localctx.token_name == INTEGER_TOKEN;
+
+		case 12: return _localctx.token.getText().charAt(0) == '-';
+
+		case 13: return _localctx.token_name == FLOAT_NUMBER_TOKEN;
+
+		case 14: return _localctx.token.getText().charAt(0) == '-';
+
+		case 15: return testYFX(_localctx.Options, _localctx.priority);
 		}
 		return true;
 	}
@@ -1781,80 +2019,103 @@ public class TermParser extends Parser {
 	}
 	private boolean simpleTerm_sempred(SimpleTermContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 9: return _input.LA(2) == OPEN_TOKEN;
+		case 21: return _input.LA(2) == OPEN_TOKEN;
 
-		case 10: return testNoOp(_localctx.Options);
+		case 22: return testNoOp(_localctx.Options);
 		}
 		return true;
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3_\u00e8\4\2\t\2\4"+
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3_\u011b\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
-		"\4\32\t\32\4\33\t\33\3\2\3\2\3\2\3\2\3\2\3\2\5\2=\n\2\3\3\3\3\3\3\3\3"+
-		"\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4L\n\4\3\5\3\5\3\5\3\5\3\5\3\5"+
-		"\3\5\3\5\5\5V\n\5\3\6\3\6\3\6\3\7\3\7\3\7\3\7\3\7\3\7\3\7\5\7b\n\7\3\b"+
-		"\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\5\bs\n\b\3\t"+
+		"\4\32\t\32\4\33\t\33\3\2\3\2\3\2\3\2\3\2\5\2<\n\2\3\3\3\3\3\3\3\3\3\4"+
+		"\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4M\n\4\3\5\3\5\3\5\3\5\3\5"+
+		"\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3"+
+		"\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\6\5p\n\5\r\5\16\5q\3\5\3\5"+
+		"\3\5\3\5\6\5x\n\5\r\5\16\5y\3\5\3\5\3\5\3\5\3\5\3\5\6\5\u0082\n\5\r\5"+
+		"\16\5\u0083\3\5\3\5\3\5\3\5\6\5\u008a\n\5\r\5\16\5\u008b\5\5\u008e\n\5"+
+		"\5\5\u0090\n\5\5\5\u0092\n\5\3\6\3\6\3\6\3\6\3\6\3\6\3\6\3\6\5\6\u009c"+
+		"\n\6\3\7\3\7\3\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\5\b\u00a8\n\b\3\t\3\t\3\t"+
 		"\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3"+
-		"\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u0094\n\t\3\n\3"+
-		"\n\3\n\3\n\3\n\3\n\3\n\3\n\7\n\u009e\n\n\f\n\16\n\u00a1\13\n\3\n\3\n\3"+
-		"\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\f"+
-		"\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\7\f\u00bd\n\f\f\f\16\f\u00c0\13\f\3\f"+
-		"\3\f\3\f\3\r\3\r\3\r\3\16\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\20\3\21"+
-		"\3\21\3\21\3\22\3\22\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\27\3\27"+
-		"\3\30\3\30\3\31\3\31\3\32\3\32\3\33\3\33\3\33\2\34\2\4\6\b\n\f\16\20\22"+
-		"\24\26\30\32\34\36 \"$&(*,.\60\62\64\2\2\u00de\2<\3\2\2\2\4>\3\2\2\2\6"+
-		"K\3\2\2\2\bU\3\2\2\2\nW\3\2\2\2\fa\3\2\2\2\16r\3\2\2\2\20\u0093\3\2\2"+
-		"\2\22\u0095\3\2\2\2\24\u00ac\3\2\2\2\26\u00b3\3\2\2\2\30\u00c4\3\2\2\2"+
-		"\32\u00c7\3\2\2\2\34\u00ca\3\2\2\2\36\u00cd\3\2\2\2 \u00d0\3\2\2\2\"\u00d3"+
-		"\3\2\2\2$\u00d5\3\2\2\2&\u00d7\3\2\2\2(\u00d9\3\2\2\2*\u00db\3\2\2\2,"+
-		"\u00dd\3\2\2\2.\u00df\3\2\2\2\60\u00e1\3\2\2\2\62\u00e3\3\2\2\2\64\u00e5"+
-		"\3\2\2\2\66=\7\2\2\3\67=\7\r\2\289\5\6\4\29:\b\2\1\2:;\5\64\33\2;=\3\2"+
-		"\2\2<\66\3\2\2\2<\67\3\2\2\2<8\3\2\2\2=\3\3\2\2\2>?\5\6\4\2?@\b\3\1\2"+
-		"@A\7\2\2\3A\5\3\2\2\2BC\6\4\2\3CD\5\20\t\2DE\b\4\1\2EL\3\2\2\2FG\6\4\3"+
-		"\3GH\6\4\4\2HI\5\30\r\2IJ\b\4\1\2JL\3\2\2\2KB\3\2\2\2KF\3\2\2\2L\7\3\2"+
-		"\2\2MN\6\5\5\3NO\6\5\6\2OP\5\30\r\2PQ\b\5\1\2QV\3\2\2\2RS\5\6\4\2ST\b"+
-		"\5\1\2TV\3\2\2\2UM\3\2\2\2UR\3\2\2\2V\t\3\2\2\2WX\7\22\2\2XY\b\6\1\2Y"+
-		"\13\3\2\2\2Z[\6\7\7\3[\\\6\7\b\2\\]\5\62\32\2]^\b\7\1\2^b\3\2\2\2_`\7"+
-		"\22\2\2`b\b\7\1\2aZ\3\2\2\2a_\3\2\2\2b\r\3\2\2\2cd\6\b\t\3de\5\n\6\2e"+
-		"f\b\b\1\2fg\5\6\4\2gh\b\b\1\2hs\3\2\2\2ij\6\b\n\3jk\5\n\6\2kl\b\b\1\2"+
-		"lm\5\6\4\2mn\b\b\1\2ns\3\2\2\2op\5\6\4\2pq\b\b\1\2qs\3\2\2\2rc\3\2\2\2"+
-		"ri\3\2\2\2ro\3\2\2\2s\17\3\2\2\2tu\6\t\13\2uv\5\26\f\2vw\b\t\1\2w\u0094"+
-		"\3\2\2\2xy\6\t\f\3yz\5\30\r\2z{\b\t\1\2{\u0094\3\2\2\2|}\5\32\16\2}~\b"+
-		"\t\1\2~\u0094\3\2\2\2\177\u0080\5\34\17\2\u0080\u0081\b\t\1\2\u0081\u0094"+
-		"\3\2\2\2\u0082\u0083\5\36\20\2\u0083\u0084\b\t\1\2\u0084\u0094\3\2\2\2"+
-		"\u0085\u0086\5\22\n\2\u0086\u0087\b\t\1\2\u0087\u0094\3\2\2\2\u0088\u0089"+
-		"\5\24\13\2\u0089\u008a\b\t\1\2\u008a\u0094\3\2\2\2\u008b\u008c\5 \21\2"+
-		"\u008c\u008d\b\t\1\2\u008d\u0094\3\2\2\2\u008e\u008f\5\"\22\2\u008f\u0090"+
-		"\5\6\4\2\u0090\u0091\b\t\1\2\u0091\u0092\5&\24\2\u0092\u0094\3\2\2\2\u0093"+
-		"t\3\2\2\2\u0093x\3\2\2\2\u0093|\3\2\2\2\u0093\177\3\2\2\2\u0093\u0082"+
-		"\3\2\2\2\u0093\u0085\3\2\2\2\u0093\u0088\3\2\2\2\u0093\u008b\3\2\2\2\u0093"+
-		"\u008e\3\2\2\2\u0094\21\3\2\2\2\u0095\u0096\5(\25\2\u0096\u0097\5\b\5"+
-		"\2\u0097\u0098\b\n\1\2\u0098\u009f\b\n\1\2\u0099\u009a\5\62\32\2\u009a"+
-		"\u009b\5\b\5\2\u009b\u009c\b\n\1\2\u009c\u009e\3\2\2\2\u009d\u0099\3\2"+
-		"\2\2\u009e\u00a1\3\2\2\2\u009f\u009d\3\2\2\2\u009f\u00a0\3\2\2\2\u00a0"+
-		"\u00a2\3\2\2\2\u00a1\u009f\3\2\2\2\u00a2\u00a3\5\60\31\2\u00a3\u00a4\b"+
-		"\n\1\2\u00a4\u00a5\5\b\5\2\u00a5\u00a6\b\n\1\2\u00a6\u00a7\b\n\1\2\u00a7"+
-		"\u00a8\3\2\2\2\u00a8\u00a9\5*\26\2\u00a9\u00aa\b\n\1\2\u00aa\u00ab\b\n"+
-		"\1\2\u00ab\23\3\2\2\2\u00ac\u00ad\5,\27\2\u00ad\u00ae\3\2\2\2\u00ae\u00af"+
-		"\5\6\4\2\u00af\u00b0\5.\30\2\u00b0\u00b1\3\2\2\2\u00b1\u00b2\b\13\1\2"+
-		"\u00b2\25\3\2\2\2\u00b3\u00b4\5\30\r\2\u00b4\u00b5\b\f\1\2\u00b5\u00b6"+
-		"\5$\23\2\u00b6\u00b7\5\b\5\2\u00b7\u00be\b\f\1\2\u00b8\u00b9\5\62\32\2"+
-		"\u00b9\u00ba\5\b\5\2\u00ba\u00bb\b\f\1\2\u00bb\u00bd\3\2\2\2\u00bc\u00b8"+
-		"\3\2\2\2\u00bd\u00c0\3\2\2\2\u00be\u00bc\3\2\2\2\u00be\u00bf\3\2\2\2\u00bf"+
-		"\u00c1\3\2\2\2\u00c0\u00be\3\2\2\2\u00c1\u00c2\5&\24\2\u00c2\u00c3\b\f"+
-		"\1\2\u00c3\27\3\2\2\2\u00c4\u00c5\7\22\2\2\u00c5\u00c6\b\r\1\2\u00c6\31"+
-		"\3\2\2\2\u00c7\u00c8\7\23\2\2\u00c8\u00c9\b\16\1\2\u00c9\33\3\2\2\2\u00ca"+
-		"\u00cb\7\24\2\2\u00cb\u00cc\b\17\1\2\u00cc\35\3\2\2\2\u00cd\u00ce\7K\2"+
-		"\2\u00ce\u00cf\b\20\1\2\u00cf\37\3\2\2\2\u00d0\u00d1\7N\2\2\u00d1\u00d2"+
-		"\b\21\1\2\u00d2!\3\2\2\2\u00d3\u00d4\7\b\2\2\u00d4#\3\2\2\2\u00d5\u00d6"+
-		"\7\b\2\2\u00d6%\3\2\2\2\u00d7\u00d8\7\t\2\2\u00d8\'\3\2\2\2\u00d9\u00da"+
-		"\7\5\2\2\u00da)\3\2\2\2\u00db\u00dc\7\6\2\2\u00dc+\3\2\2\2\u00dd\u00de"+
-		"\7\n\2\2\u00de-\3\2\2\2\u00df\u00e0\7\13\2\2\u00e0/\3\2\2\2\u00e1\u00e2"+
-		"\7\7\2\2\u00e2\61\3\2\2\2\u00e3\u00e4\7\f\2\2\u00e4\63\3\2\2\2\u00e5\u00e6"+
-		"\7\r\2\2\u00e6\65\3\2\2\2\n<KUar\u0093\u009f\u00be";
+		"\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\5\t\u00c9\n\t\3\n\3\n\3\n\3"+
+		"\n\3\n\3\n\3\n\7\n\u00d2\n\n\f\n\16\n\u00d5\13\n\3\n\3\n\3\n\3\n\5\n\u00db"+
+		"\n\n\3\n\3\n\3\n\3\13\3\13\3\13\3\13\3\13\3\13\3\13\3\f\3\f\3\f\3\f\3"+
+		"\f\3\f\3\f\3\f\3\f\7\f\u00f0\n\f\f\f\16\f\u00f3\13\f\3\f\3\f\3\f\3\r\3"+
+		"\r\3\r\3\16\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\20\3\21\3\21\3\21\3\22"+
+		"\3\22\3\23\3\23\3\24\3\24\3\25\3\25\3\26\3\26\3\27\3\27\3\30\3\30\3\31"+
+		"\3\31\3\32\3\32\3\33\3\33\3\33\2\34\2\4\6\b\n\f\16\20\22\24\26\30\32\34"+
+		"\36 \"$&(*,.\60\62\64\2\3\3\3\r\r\u011e\2;\3\2\2\2\4=\3\2\2\2\6L\3\2\2"+
+		"\2\b\u0091\3\2\2\2\n\u009b\3\2\2\2\f\u009d\3\2\2\2\16\u00a7\3\2\2\2\20"+
+		"\u00c8\3\2\2\2\22\u00ca\3\2\2\2\24\u00df\3\2\2\2\26\u00e6\3\2\2\2\30\u00f7"+
+		"\3\2\2\2\32\u00fa\3\2\2\2\34\u00fd\3\2\2\2\36\u0100\3\2\2\2 \u0103\3\2"+
+		"\2\2\"\u0106\3\2\2\2$\u0108\3\2\2\2&\u010a\3\2\2\2(\u010c\3\2\2\2*\u010e"+
+		"\3\2\2\2,\u0110\3\2\2\2.\u0112\3\2\2\2\60\u0114\3\2\2\2\62\u0116\3\2\2"+
+		"\2\64\u0118\3\2\2\2\66<\t\2\2\2\678\5\6\4\289\b\2\1\29:\5\64\33\2:<\3"+
+		"\2\2\2;\66\3\2\2\2;\67\3\2\2\2<\3\3\2\2\2=>\5\6\4\2>?\b\3\1\2?@\7\2\2"+
+		"\3@\5\3\2\2\2AM\3\2\2\2BC\6\4\2\3CD\5\20\t\2DE\b\4\1\2EM\3\2\2\2FG\6\4"+
+		"\3\3GH\6\4\4\2HI\5\30\r\2IJ\b\4\1\2JM\3\2\2\2KM\5\b\5\2LA\3\2\2\2LB\3"+
+		"\2\2\2LF\3\2\2\2LK\3\2\2\2M\7\3\2\2\2NO\6\5\5\3OP\5\f\7\2PQ\b\5\1\2QR"+
+		"\5\6\4\2RS\b\5\1\2S\u0092\3\2\2\2TU\6\5\6\3UV\5\f\7\2VW\b\5\1\2WX\5\6"+
+		"\4\2XY\b\5\1\2Y\u0092\3\2\2\2Z[\6\5\7\3[\\\5\16\b\2\\]\b\5\1\2]^\5\6\4"+
+		"\2^_\b\5\1\2_\u0090\3\2\2\2`a\6\5\b\3ab\5\16\b\2bc\b\5\1\2c\u0090\3\2"+
+		"\2\2de\6\5\t\3ef\5\16\b\2fg\b\5\1\2gh\5\6\4\2hi\b\5\1\2i\u0090\3\2\2\2"+
+		"j\u008e\b\5\1\2kl\6\5\r\3lm\6\5\16\3mn\7\24\2\2np\b\5\1\2ok\3\2\2\2pq"+
+		"\3\2\2\2qo\3\2\2\2qr\3\2\2\2r\u008e\3\2\2\2st\6\5\17\3tu\6\5\20\3uv\7"+
+		"K\2\2vx\b\5\1\2ws\3\2\2\2xy\3\2\2\2yw\3\2\2\2yz\3\2\2\2z\u008e\3\2\2\2"+
+		"{|\6\5\21\3|}\5\16\b\2}~\b\5\1\2~\177\5\6\4\2\177\u0080\b\5\1\2\u0080"+
+		"\u0082\3\2\2\2\u0081{\3\2\2\2\u0082\u0083\3\2\2\2\u0083\u0081\3\2\2\2"+
+		"\u0083\u0084\3\2\2\2\u0084\u008e\3\2\2\2\u0085\u0086\6\5\22\3\u0086\u0087"+
+		"\5\16\b\2\u0087\u0088\b\5\1\2\u0088\u008a\3\2\2\2\u0089\u0085\3\2\2\2"+
+		"\u008a\u008b\3\2\2\2\u008b\u0089\3\2\2\2\u008b\u008c\3\2\2\2\u008c\u008e"+
+		"\3\2\2\2\u008dj\3\2\2\2\u008do\3\2\2\2\u008dw\3\2\2\2\u008d\u0081\3\2"+
+		"\2\2\u008d\u0089\3\2\2\2\u008e\u0090\3\2\2\2\u008fZ\3\2\2\2\u008f`\3\2"+
+		"\2\2\u008fd\3\2\2\2\u008f\u008d\3\2\2\2\u0090\u0092\3\2\2\2\u0091N\3\2"+
+		"\2\2\u0091T\3\2\2\2\u0091\u008f\3\2\2\2\u0092\t\3\2\2\2\u0093\u0094\6"+
+		"\6\23\3\u0094\u0095\6\6\24\2\u0095\u0096\5\30\r\2\u0096\u0097\b\6\1\2"+
+		"\u0097\u009c\3\2\2\2\u0098\u0099\5\6\4\2\u0099\u009a\b\6\1\2\u009a\u009c"+
+		"\3\2\2\2\u009b\u0093\3\2\2\2\u009b\u0098\3\2\2\2\u009c\13\3\2\2\2\u009d"+
+		"\u009e\7\22\2\2\u009e\u009f\b\7\1\2\u009f\r\3\2\2\2\u00a0\u00a1\6\b\25"+
+		"\3\u00a1\u00a2\6\b\26\2\u00a2\u00a3\5\62\32\2\u00a3\u00a4\b\b\1\2\u00a4"+
+		"\u00a8\3\2\2\2\u00a5\u00a6\7\22\2\2\u00a6\u00a8\b\b\1\2\u00a7\u00a0\3"+
+		"\2\2\2\u00a7\u00a5\3\2\2\2\u00a8\17\3\2\2\2\u00a9\u00aa\6\t\27\2\u00aa"+
+		"\u00ab\5\26\f\2\u00ab\u00ac\b\t\1\2\u00ac\u00c9\3\2\2\2\u00ad\u00ae\6"+
+		"\t\30\3\u00ae\u00af\5\30\r\2\u00af\u00b0\b\t\1\2\u00b0\u00c9\3\2\2\2\u00b1"+
+		"\u00b2\5\32\16\2\u00b2\u00b3\b\t\1\2\u00b3\u00c9\3\2\2\2\u00b4\u00b5\5"+
+		"\34\17\2\u00b5\u00b6\b\t\1\2\u00b6\u00c9\3\2\2\2\u00b7\u00b8\5\36\20\2"+
+		"\u00b8\u00b9\b\t\1\2\u00b9\u00c9\3\2\2\2\u00ba\u00bb\5\22\n\2\u00bb\u00bc"+
+		"\b\t\1\2\u00bc\u00c9\3\2\2\2\u00bd\u00be\5\24\13\2\u00be\u00bf\b\t\1\2"+
+		"\u00bf\u00c9\3\2\2\2\u00c0\u00c1\5 \21\2\u00c1\u00c2\b\t\1\2\u00c2\u00c9"+
+		"\3\2\2\2\u00c3\u00c4\5\"\22\2\u00c4\u00c5\5\6\4\2\u00c5\u00c6\b\t\1\2"+
+		"\u00c6\u00c7\5&\24\2\u00c7\u00c9\3\2\2\2\u00c8\u00a9\3\2\2\2\u00c8\u00ad"+
+		"\3\2\2\2\u00c8\u00b1\3\2\2\2\u00c8\u00b4\3\2\2\2\u00c8\u00b7\3\2\2\2\u00c8"+
+		"\u00ba\3\2\2\2\u00c8\u00bd\3\2\2\2\u00c8\u00c0\3\2\2\2\u00c8\u00c3\3\2"+
+		"\2\2\u00c9\21\3\2\2\2\u00ca\u00da\5(\25\2\u00cb\u00cc\5\n\6\2\u00cc\u00d3"+
+		"\b\n\1\2\u00cd\u00ce\5\62\32\2\u00ce\u00cf\5\n\6\2\u00cf\u00d0\b\n\1\2"+
+		"\u00d0\u00d2\3\2\2\2\u00d1\u00cd\3\2\2\2\u00d2\u00d5\3\2\2\2\u00d3\u00d1"+
+		"\3\2\2\2\u00d3\u00d4\3\2\2\2\u00d4\u00d6\3\2\2\2\u00d5\u00d3\3\2\2\2\u00d6"+
+		"\u00d7\5\60\31\2\u00d7\u00d8\5\n\6\2\u00d8\u00d9\b\n\1\2\u00d9\u00db\3"+
+		"\2\2\2\u00da\u00cb\3\2\2\2\u00da\u00db\3\2\2\2\u00db\u00dc\3\2\2\2\u00dc"+
+		"\u00dd\5*\26\2\u00dd\u00de\b\n\1\2\u00de\23\3\2\2\2\u00df\u00e0\5,\27"+
+		"\2\u00e0\u00e1\3\2\2\2\u00e1\u00e2\5\6\4\2\u00e2\u00e3\5.\30\2\u00e3\u00e4"+
+		"\3\2\2\2\u00e4\u00e5\b\13\1\2\u00e5\25\3\2\2\2\u00e6\u00e7\5\30\r\2\u00e7"+
+		"\u00e8\b\f\1\2\u00e8\u00e9\5$\23\2\u00e9\u00ea\5\n\6\2\u00ea\u00f1\b\f"+
+		"\1\2\u00eb\u00ec\5\62\32\2\u00ec\u00ed\5\n\6\2\u00ed\u00ee\b\f\1\2\u00ee"+
+		"\u00f0\3\2\2\2\u00ef\u00eb\3\2\2\2\u00f0\u00f3\3\2\2\2\u00f1\u00ef\3\2"+
+		"\2\2\u00f1\u00f2\3\2\2\2\u00f2\u00f4\3\2\2\2\u00f3\u00f1\3\2\2\2\u00f4"+
+		"\u00f5\5&\24\2\u00f5\u00f6\b\f\1\2\u00f6\27\3\2\2\2\u00f7\u00f8\7\22\2"+
+		"\2\u00f8\u00f9\b\r\1\2\u00f9\31\3\2\2\2\u00fa\u00fb\7\23\2\2\u00fb\u00fc"+
+		"\b\16\1\2\u00fc\33\3\2\2\2\u00fd\u00fe\7\24\2\2\u00fe\u00ff\b\17\1\2\u00ff"+
+		"\35\3\2\2\2\u0100\u0101\7K\2\2\u0101\u0102\b\20\1\2\u0102\37\3\2\2\2\u0103"+
+		"\u0104\7N\2\2\u0104\u0105\b\21\1\2\u0105!\3\2\2\2\u0106\u0107\7\b\2\2"+
+		"\u0107#\3\2\2\2\u0108\u0109\7\b\2\2\u0109%\3\2\2\2\u010a\u010b\7\t\2\2"+
+		"\u010b\'\3\2\2\2\u010c\u010d\7\5\2\2\u010d)\3\2\2\2\u010e\u010f\7\6\2"+
+		"\2\u010f+\3\2\2\2\u0110\u0111\7\n\2\2\u0111-\3\2\2\2\u0112\u0113\7\13"+
+		"\2\2\u0113/\3\2\2\2\u0114\u0115\7\7\2\2\u0115\61\3\2\2\2\u0116\u0117\7"+
+		"\f\2\2\u0117\63\3\2\2\2\u0118\u0119\7\r\2\2\u0119\65\3\2\2\2\21;Lqy\u0083"+
+		"\u008b\u008d\u008f\u0091\u009b\u00a7\u00c8\u00d3\u00da\u00f1";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {

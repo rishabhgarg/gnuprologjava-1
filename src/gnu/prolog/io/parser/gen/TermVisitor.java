@@ -5,6 +5,7 @@ import gnu.prolog.io.parser.*;
 import gnu.prolog.term.*;
 import gnu.prolog.io.*;
 import gnu.prolog.vm.*;
+import java.io.IOException;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
