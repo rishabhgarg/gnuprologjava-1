@@ -727,145 +727,245 @@ SPECIAL_TOKEN :
 TOKEN :
 {
 // 6.4.2 Names
-  <NAME_TOKEN:<IDENTIFIER_TOKEN>
-             | <GRAPHIC_TOKEN>
-             | <QUOTED_TOKEN>
-             | <SEMICOLON_TOKEN>
-             | <CUT_TOKEN>>
-| <#IDENTIFIER_TOKEN: <ID_START> (<ID_CONTINUE>)* >
-| <#ID_START: <LL>>
-| <#ID_CONTINUE: <LL> | <LU> | <LM> | <MN> | <LT> | <LO> | <NL> | <MC> | <ND> | <PC>>
-| <#GRAPHIC_TOKEN: "." (<GRAPHIC_TOKEN_CHAR>)+ | <GRAPHIC_TOKEN_CHAR> (<GRAPHIC_TOKEN_CHAR>|".")* >
-| <#GRAPHIC_TOKEN_CHAR: <GRAPHIC_CHAR> | <BACKSLASH_CHAR>>
-| <#QUOTED_TOKEN: <SINGLE_QUOTE_CHAR>/*6.5.5*/
-                  (<SINGLE_QUOTED_ITEM> )*
-                  <SINGLE_QUOTE_CHAR>/*6.5.5*/>
-| <#SINGLE_QUOTED_ITEM: <SINGLE_QUOTED_CHAR> /*6.4.2.1*/
-                     | <CONTINUATION_ESCAPE_SEQUENCE>  >
-| <#CONTINUATION_ESCAPE_SEQUENCE: <BACKSLASH_CHAR> /*6.5.5*/
-                                 <NEW_LINE_CHAR> /*6.5.4*/>
-| <#SEMICOLON_TOKEN: <SEMICOLON_CHAR> /*6.5.3*/ >
-| <#CUT_TOKEN: <CUT_CHAR> >
+<NAME_TOKEN
+	:	  <IDENTIFIER_TOKEN>
+             	| <GRAPHIC_TOKEN>
+             	| <QUOTED_TOKEN>
+             	| <SEMICOLON_TOKEN>
+             	| <CUT_TOKEN>						>
+             	
+| <#IDENTIFIER_TOKEN
+	: 	  <ID_START> (<ID_CONTINUE>)* 				>
+
+| <#ID_START
+	: 	  <LL> 							>
+
+| <#ID_CONTINUE
+	: 	  <LL> | <LU> | <LM> | <MN> | <LT> 
+		| <LO> | <NL> | <MC> | <ND> | <PC>			>
+
+| <#GRAPHIC_TOKEN
+	: 	  "." (<GRAPHIC_TOKEN_CHAR>)+ 
+		| <GRAPHIC_TOKEN_CHAR> (<GRAPHIC_TOKEN_CHAR> | ".")* 	>
+		
+| <#GRAPHIC_TOKEN_CHAR
+	: 	  <GRAPHIC_CHAR> 
+		| <BACKSLASH_CHAR>					>
+		
+| <#QUOTED_TOKEN
+	: 	  <SINGLE_QUOTE_CHAR>			/*6.5.5*/
+                  (<SINGLE_QUOTED_ITEM>)*
+                  <SINGLE_QUOTE_CHAR>			/*6.5.5*/	>
+                  
+| <#SINGLE_QUOTED_ITEM
+	: 	  <SINGLE_QUOTED_CHAR> 			/*6.4.2.1*/
+               	| <CONTINUATION_ESCAPE_SEQUENCE>  			>
+               	
+| <#CONTINUATION_ESCAPE_SEQUENCE
+	: 	  <BACKSLASH_CHAR> 			/*6.5.5*/
+                  <NEW_LINE_CHAR> 			/*6.5.4*/	>
+                                 
+| <#SEMICOLON_TOKEN
+	: 	  <SEMICOLON_CHAR> 			/*6.5.3*/ 	>
+	
+| <#CUT_TOKEN
+	: 	  <CUT_CHAR> 						>
+
+	
 // 6.4.2.1 QUOTED CHARACTERS
-| <#SINGLE_QUOTED_CHAR: <NON_QUOTE_CHAR>
-                     | <SINGLE_QUOTE_CHAR>/*6.5.5*/ <SINGLE_QUOTE_CHAR> /*6.5.5*/
-                     | <DOUBLE_QUOTE_CHAR>/*6.5.5*/
-                     | <BACK_QUOTE_CHAR>/*6.5.5*/>
+| <#SINGLE_QUOTED_CHAR
+	: 	  <NON_QUOTE_CHAR>
+                | <SINGLE_QUOTE_CHAR><SINGLE_QUOTE_CHAR>/*6.5.5*/
+                | <DOUBLE_QUOTE_CHAR>			/*6.5.5*/
+                | <BACK_QUOTE_CHAR>			/*6.5.5*/	>
 
-| <#DOUBLE_QUOTED_CHAR: <NON_QUOTE_CHAR>
-                     | <SINGLE_QUOTE_CHAR>/*6.5.5*/
-                     | <DOUBLE_QUOTE_CHAR>/*6.5.5*/ <DOUBLE_QUOTE_CHAR>/*6.5.5*/
-                     | <BACK_QUOTE_CHAR>/*6.5.5*/>
-| <#BACK_QUOTED_CHAR: <NON_QUOTE_CHAR>
-                   | <SINGLE_QUOTE_CHAR>/*6.5.5*/
-                   | <DOUBLE_QUOTE_CHAR>/*6.5.5*/
-                   | <BACK_QUOTE_CHAR>/*6.5.5*/ <BACK_QUOTE_CHAR>/*6.5.5*/>
-| <#NON_QUOTE_CHAR: <GRAPHIC_CHAR>
-                 | <ALPHA_NUMERIC_CHAR>
-                 | <SOLO_CHAR>
-                 | <SPACE_CHAR>
-                 | <META_ESCAPE_SEQUENCE>
-                 | <CONTROL_ESCAPE_SEQUENCE>
-                 | <OCTAL_ESCAPE_SEQUENCE>
-                 | <HEXADECIMAL_ESCAPE_SEQUENCE>
-                 | "." >
-| <#META_ESCAPE_SEQUENCE: <BACKSLASH_CHAR> /* 6.5.5 */
-                         <META_CHAR> /* 6.5.5 */ >
-| <#CONTROL_ESCAPE_SEQUENCE: <BACKSLASH_CHAR> /* 6.5.5 */
-                            <SYMBOLIC_CONTROL_CHAR> /* 6.5.5 */ >
-| <#SYMBOLIC_CONTROL_CHAR: <SYMBOLIC_ALERT_CHAR>
-                       | <SYMBOLIC_BACKSPACE_CHAR>
-                       | <SYMBOLIC_FORM_FEED_CHAR>
-                       | <SYMBOLIC_NEW_LINE_CHAR>
-                       | <SYMBOLIC_HORIZONTAL_TAB_CHAR>
-                       | <SYMBOLIC_VERTICAL_TAB_CHAR>
-                       | <SYMBOLIC_CARRIAGE_RETURN_CHAR>>
-| <#SYMBOLIC_ALERT_CHAR:          "a">
-| <#SYMBOLIC_BACKSPACE_CHAR:      "b">
-| <#SYMBOLIC_FORM_FEED_CHAR:      "f">
-| <#SYMBOLIC_NEW_LINE_CHAR:       "n">
-| <#SYMBOLIC_HORIZONTAL_TAB_CHAR: "t">
-| <#SYMBOLIC_VERTICAL_TAB_CHAR:   "v">
-| <#SYMBOLIC_CARRIAGE_RETURN_CHAR:"r">
-| <#SYMBOLIC_HEXADECIMAL_CHAR:    "x">
+| <#DOUBLE_QUOTED_CHAR
+	: 	  <NON_QUOTE_CHAR>
+               	| <SINGLE_QUOTE_CHAR>			/*6.5.5*/
+                | <DOUBLE_QUOTE_CHAR><DOUBLE_QUOTE_CHAR>/*6.5.5*/
+                | <BACK_QUOTE_CHAR>			/*6.5.5*/	>
+                
+| <#BACK_QUOTED_CHAR
+	: 	  <NON_QUOTE_CHAR>
+               	| <SINGLE_QUOTE_CHAR>			/*6.5.5*/
+                | <DOUBLE_QUOTE_CHAR>			/*6.5.5*/
+                | <BACK_QUOTE_CHAR><BACK_QUOTE_CHAR>	/*6.5.5*/	>
+                
+| <#NON_QUOTE_CHAR
+	: 	  <GRAPHIC_CHAR>
+                | <ALPHA_NUMERIC_CHAR>
+                | <SOLO_CHAR>
+                | <SPACE_CHAR>
+                | <META_ESCAPE_SEQUENCE>
+                | <CONTROL_ESCAPE_SEQUENCE>
+           	| <OCTAL_ESCAPE_SEQUENCE>
+                | <HEXADECIMAL_ESCAPE_SEQUENCE>
+                | "." 							>
+                
+| <#META_ESCAPE_SEQUENCE
+	: 	  <BACKSLASH_CHAR> <META_CHAR> 		/* 6.5.5 */ 	>
+	
+| <#CONTROL_ESCAPE_SEQUENCE
+	: 	  <BACKSLASH_CHAR>			/* 6.5.5 */
+		  <SYMBOLIC_CONTROL_CHAR>		/* 6.5.5 */ 	>
+		  
+| <#SYMBOLIC_CONTROL_CHAR
+	: 	  <SYMBOLIC_ALERT_CHAR>
+                | <SYMBOLIC_BACKSPACE_CHAR>
+                | <SYMBOLIC_FORM_FEED_CHAR>
+                | <SYMBOLIC_NEW_LINE_CHAR>
+                | <SYMBOLIC_HORIZONTAL_TAB_CHAR>
+                | <SYMBOLIC_VERTICAL_TAB_CHAR>
+                | <SYMBOLIC_CARRIAGE_RETURN_CHAR>			>
+                
+| <#SYMBOLIC_ALERT_CHAR:          "a"					>
+| <#SYMBOLIC_BACKSPACE_CHAR:      "b"					>
+| <#SYMBOLIC_FORM_FEED_CHAR:      "f"					>
+| <#SYMBOLIC_NEW_LINE_CHAR:       "n"					>
+| <#SYMBOLIC_HORIZONTAL_TAB_CHAR: "t"					>
+| <#SYMBOLIC_VERTICAL_TAB_CHAR:   "v"					>
+| <#SYMBOLIC_CARRIAGE_RETURN_CHAR:"r"					>
+| <#SYMBOLIC_HEXADECIMAL_CHAR:    "x"					>
 
-| <#OCTAL_ESCAPE_SEQUENCE: <BACKSLASH_CHAR> /* 6.5.5 */
-                          (<OCTAL_DIGIT_CHAR>)+ /* 6.5.2 */
-                          <BACKSLASH_CHAR> /* 6.5.5 */>
+| <#OCTAL_ESCAPE_SEQUENCE
+	: 	  <BACKSLASH_CHAR> 			/* 6.5.5 */
+                  (<OCTAL_DIGIT_CHAR>)+ 		/* 6.5.2 */
+                  <BACKSLASH_CHAR> 			/* 6.5.5 */	>
 
-| <#HEXADECIMAL_ESCAPE_SEQUENCE: <BACKSLASH_CHAR> /* 6.5.5 */
-                          <SYMBOLIC_HEXADECIMAL_CHAR>
-                          (<HEXADECIMAL_DIGIT_CHAR>)+ /* 6.5.2 */
-                          <BACKSLASH_CHAR> /* 6.5.5 */>
+| <#HEXADECIMAL_ESCAPE_SEQUENCE
+	: 	  <BACKSLASH_CHAR> 			/* 6.5.5 */
+                  <SYMBOLIC_HEXADECIMAL_CHAR>
+                  (<HEXADECIMAL_DIGIT_CHAR>)+ 		/* 6.5.2 */
+                  <BACKSLASH_CHAR> 			/* 6.5.5 */	>
+
+                  
 // 6.4.3 Variables
-| <VARIABLE_TOKEN: <ANONYMOUS_VARIABLE>
-                 | <NAMED_VARIABLE>>
+| <VARIABLE_TOKEN
+	: 	  <ANONYMOUS_VARIABLE>
+                | <NAMED_VARIABLE>					>
 
-| <#ANONYMOUS_VARIABLE: <VARIABLE_INDICATOR_CHAR>>
+| <#ANONYMOUS_VARIABLE
+	: 	  <VARIABLE_INDICATOR_CHAR>				>
 
-| <#NAMED_VARIABLE: <VARIABLE_INDICATOR_CHAR> (<ID_CONTINUE>)+ /* 6.5.2*/
-                 | <LU>/* 6.5.2*/ (<ID_CONTINUE>)*/* 6.5.2*/>
-| <#VARIABLE_INDICATOR_CHAR: <UNDERSCORE_CHAR>/* 6.5.2*/>
+| <#NAMED_VARIABLE
+	: 	  <VARIABLE_INDICATOR_CHAR> (<ID_CONTINUE>)+
+              	| <LU> (<ID_CONTINUE>)					>
+              	
+| <#VARIABLE_INDICATOR_CHAR
+	: 	  <UNDERSCORE_CHAR>			/* 6.5.2*/	>
+
 
 // 6.4.4 INTEGER NUMBERS + 6.3.2.1 Negative numbers
-| <INTEGER_TOKEN: (["-"])? ( <INTEGER_CONSTANT>
-                        | <CHARACTER_CODE_CONSTANT>
-                        | <BINARY_CONSTANT>
-                        | <OCTAL_CONSTANT>
-                        | <HEXADECIMAL_CONSTANT>
-                        )>
-| <#INTEGER_CONSTANT: (<DECIMAL_DIGIT_CHAR>)+ /* 6.5.2 */ >
-| <#CHARACTER_CODE_CONSTANT: "0" <SINGLE_QUOTE_CHAR> /* 6.5.2 */
-                            <SINGLE_QUOTED_CHAR> /*6.4.2.1*/ >
-| <#BINARY_CONSTANT: "0b" (<BINARY_DIGIT_CHAR>)+ /* 6.5.2 */>
-| <#OCTAL_CONSTANT: "0o" (<OCTAL_DIGIT_CHAR>)+ /* 6.5.2 */>
-| <#HEXADECIMAL_CONSTANT: "0x" (<HEXADECIMAL_DIGIT_CHAR>)+ /* 6.5.2 */>
+| <INTEGER_TOKEN
+	: 	  (["-"])? 
+		( <INTEGER_CONSTANT>
+                | <CHARACTER_CODE_CONSTANT>
+                | <BINARY_CONSTANT>
+                | <OCTAL_CONSTANT>
+                | <HEXADECIMAL_CONSTANT>
+                )							>
+                
+| <#INTEGER_CONSTANT
+	: 	  (<DECIMAL_DIGIT_CHAR>)+ 		/* 6.5.2 */ 	>
+	
+| <#CHARACTER_CODE_CONSTANT
+	: 	  "0" <SINGLE_QUOTE_CHAR> 		/* 6.5.2 */
+                  <SINGLE_QUOTED_CHAR> 			/*6.4.2.1*/ 	>
+
+| <#BINARY_CONSTANT
+	: 	  "0b" (<BINARY_DIGIT_CHAR>)+ 		/* 6.5.2 */	>
+	
+| <#OCTAL_CONSTANT
+	: 	  "0o" (<OCTAL_DIGIT_CHAR>)+ 		/* 6.5.2 */	>
+	
+| <#HEXADECIMAL_CONSTANT
+	: 	  "0x" (<HEXADECIMAL_DIGIT_CHAR>)+ 	/* 6.5.2 */	>
+
+	
 // 6.4.5 FLOATING POINT NUMBERS
-| <FLOAT_NUMBER_TOKEN: (["-"])? <INTEGER_CONSTANT> /* 6.4.4 */
-                      <FRACTION>
-                      (<EXPONENT>)? >
-| <#FRACTION: "." (<DECIMAL_DIGIT_CHAR>)+ /* 6.5.2 */ >
-| <#EXPONENT: ["E","e"] (["+","-"])? <INTEGER_CONSTANT> /*6.4.4*/ >
+| <FLOAT_NUMBER_TOKEN
+	: 	  (["-"])? <INTEGER_CONSTANT> 		/* 6.4.4 */
+                  <FRACTION>
+                  (<EXPONENT>)? 					>
+                  
+| <#FRACTION
+	: 	  "." (<DECIMAL_DIGIT_CHAR>)+ 		/* 6.5.2 */ 	>
+	
+| <#EXPONENT
+	: 	  ["E","e"] 
+		  (["+","-"])?
+	          <INTEGER_CONSTANT> 			/*6.4.4*/ 	>
+
+	          
 // 6.4.6 CHARACTER CODE LIST
-| <CHAR_CODE_LIST_TOKEN: <DOUBLE_QUOTE_CHAR> /* 6.5.5 */
-                         (<DOUBLE_QUOTED_ITEM>)*
-                         <DOUBLE_QUOTE_CHAR> /* 6.5.5 */>
-| <#DOUBLE_QUOTED_ITEM: <DOUBLE_QUOTED_CHAR> /*6.4.2.1*/
-                     | <CONTINUATION_ESCAPE_SEQUENCE> /*6.4.2*/ >
+| <CHAR_CODE_LIST_TOKEN
+	: 	  <DOUBLE_QUOTE_CHAR> 			/* 6.5.5 */
+              	  (<DOUBLE_QUOTED_ITEM>)*
+                  <DOUBLE_QUOTE_CHAR> 			/* 6.5.5 */	>
+                  
+| <#DOUBLE_QUOTED_ITEM
+	: 	  <DOUBLE_QUOTED_CHAR> 			/*6.4.2.1*/
+                | <CONTINUATION_ESCAPE_SEQUENCE> 	/*6.4.2*/ 	>
+
+                
 // 6.4.7 BACK QUOTED STRING
-| <#BACK_QUOTED_STRING: <BACK_QUOTE_CHAR>  /* 6.5.5 */
-                       <BACK_QUOTED_ITEM>
-                       <BACK_QUOTE_CHAR> /* 6.5.5 */>
-| <#BACK_QUOTED_ITEM: <BACK_QUOTED_CHAR>  /*6.4.2.1*/
-                  | <CONTINUATION_ESCAPE_SEQUENCE> /*6.4.2*/ >
+| <#BACK_QUOTED_STRING
+	: 	  <BACK_QUOTE_CHAR>  			/* 6.5.5 */
+                  <BACK_QUOTED_ITEM>
+                  <BACK_QUOTE_CHAR> 			/* 6.5.5 */	>
+                  
+| <#BACK_QUOTED_ITEM
+	: 	<BACK_QUOTED_CHAR>  			/*6.4.2.1*/
+              | <CONTINUATION_ESCAPE_SEQUENCE> 		/*6.4.2*/ 	>
+
+              
 // 6.4.8 OTHER TOKENS
-| <OPEN_TOKEN: <OPEN_CHAR>/*6.5.3*/ >
-| <CLOSE_TOKEN: <CLOSE_CHAR> /*6.5.3*/>
-| <OPEN_LIST_TOKEN: <OPEN_LIST_CHAR> /*6.5.3*/>
-| <CLOSE_LIST_TOKEN: <CLOSE_LIST_CHAR> /*6.5.3*/>
-| <OPEN_CURLY_TOKEN: <OPEN_CURLY_CHAR> /*6.5.3*/>
-| <CLOSE_CURLY_TOKEN: <CLOSE_CURLY_CHAR> /*6.5.3*/>
-| <HEAD_TAIL_SEPARATOR_TOKEN: <HEAD_TAIL_SEPARATOR_CHAR> /*6.5.3*/>
-| <COMMA_TOKEN: <COMMA_CHAR> /*6.5.3*/>
-| <END_TOKEN: <END_CHAR> >
-| <#END_CHAR: ".">
+| <OPEN_TOKEN: 			<OPEN_CHAR>		/*6.5.3*/ 	>
+| <CLOSE_TOKEN: 		<CLOSE_CHAR> 		/*6.5.3*/	>
+| <OPEN_LIST_TOKEN: 		<OPEN_LIST_CHAR>	/*6.5.3*/	>
+| <CLOSE_LIST_TOKEN: 		<CLOSE_LIST_CHAR> 	/*6.5.3*/	>
+| <OPEN_CURLY_TOKEN: 		<OPEN_CURLY_CHAR> 	/*6.5.3*/	>
+| <CLOSE_CURLY_TOKEN: 		<CLOSE_CURLY_CHAR> 	/*6.5.3*/	>
+| <HEAD_TAIL_SEPARATOR_TOKEN:   <HEAD_TAIL_SEPARATOR_CHAR>/*6.5.3*/	>
+| <COMMA_TOKEN: 		<COMMA_CHAR> 		/*6.5.3*/	>
+| <END_TOKEN: 			<END_CHAR> 				>
+| <#END_CHAR: 			"."					>
+
+
 // 6.5 PROCESSOR CHARACTER SET
-| <#CHARARCTER: <GRAPHIC_CHAR>       /* 6.5.1 */
-             | <ALPHA_NUMERIC_CHAR> /* 6.5.2 */
-             | <SOLO_CHAR>          /* 6.5.3 */
-             | <LAYOUT_CHAR>        /* 6.5.4 */
-             | <META_CHAR>>         /* 6.5.5 */
+| <#CHARARCTER
+	: 	  <GRAPHIC_CHAR>       			/* 6.5.1 */
+             	| <ALPHA_NUMERIC_CHAR> 			/* 6.5.2 */
+             	| <SOLO_CHAR>          			/* 6.5.3 */
+             	| <LAYOUT_CHAR>        			/* 6.5.4 */
+             	| <META_CHAR>        			/* 6.5.5 */	>
+
+             	
 // 6.5.1 GRAPHIC CHARACTERS
-| <#GRAPHIC_CHAR: ["#","$","&","*","+","-",/*".",*/ "/",
-                  ":","<","=",">","?","@","^","~"]>
-| <#GRAPHIC_CHAR_PERIOD: ["."] | <GRAPHIC_CHAR>>
-// 6.5.2 ALPHA NUMRIC CHARACTERS
-| <#ALPHA_NUMERIC_CHAR: <ALPHA_CHAR> | <DECIMAL_DIGIT_CHAR>>
-| <#ALPHA_CHAR: <UNDERSCORE_CHAR>
-             | <LETTER_CHAR> >
-| <#LETTER_CHAR: <CAPITAL_LETTER_CHAR>
-              | <SMALL_LETTER_CHAR>>
-| <#CAPITAL_LETTER_CHAR:    ["A"-"Z"]>
+| <#GRAPHIC_CHAR
+	: 	  ["#","$","&","*","+","-",/*".",*/ "/",
+                  ":","<","=",">","?","@","^","~"]			>
+
+| <#GRAPHIC_CHAR_PERIOD
+	: 	  ["."] 
+		| <GRAPHIC_CHAR>					>
+
+		
+// 6.5.2 ALPHA NUMERIC CHARACTERS
+| <#ALPHA_NUMERIC_CHAR
+	: 	  <ALPHA_CHAR> 
+		| <DECIMAL_DIGIT_CHAR>					>
+		
+| <#ALPHA_CHAR	
+	: 	  <UNDERSCORE_CHAR>
+             	| <LETTER_CHAR> 					>
+             	
+| <#LETTER_CHAR
+	: 	  <CAPITAL_LETTER_CHAR>
+              	| <SMALL_LETTER_CHAR>					>
+              	
+| <#CAPITAL_LETTER_CHAR
+	:    	  ["A"-"Z"]						>
 
 | <#LL : 
 [
@@ -939,49 +1039,67 @@ TOKEN :
 "\u005F" , "\u203F" , "\u2040" , "\u2054" , "\uFE33" , "\uFE34" , "\uFE4D" , "\uFE4E" , "\uFE4F" , "\uFF3F"
 ]>
 
-| <#SMALL_LETTER_CHAR:      ["a"-"z"]>
-| <#DECIMAL_DIGIT_CHAR:     ["0"-"9"]>
-| <#BINARY_DIGIT_CHAR:      ["0","1"]>
-| <#OCTAL_DIGIT_CHAR:       ["0"-"7"]>
-| <#HEXADECIMAL_DIGIT_CHAR: ["0"-"9","a"-"f","A"-"F"]>
-| <#UNDERSCORE_CHAR: "_">
+
+| <#SMALL_LETTER_CHAR:      		["a"-"z"]			>
+| <#DECIMAL_DIGIT_CHAR:     		["0"-"9"]			>
+| <#BINARY_DIGIT_CHAR:      		["0","1"]			>
+| <#OCTAL_DIGIT_CHAR:       		["0"-"7"]			>
+| <#HEXADECIMAL_DIGIT_CHAR: 		["0"-"9","a"-"f","A"-"F"]	>
+| <#UNDERSCORE_CHAR: 			"_"				>
+
+
 // 6.5.3 Solo characters
-| <#SOLO_CHAR: <CUT_CHAR>
-            | <OPEN_CHAR>
-            | <CLOSE_CHAR>
-            | <COMMA_CHAR>
-            | <SEMICOLON_CHAR>
-            | <OPEN_LIST_CHAR>
-            | <CLOSE_LIST_CHAR>
-            | <OPEN_CURLY_CHAR>
-            | <CLOSE_CURLY_CHAR>
-            | <HEAD_TAIL_SEPARATOR_CHAR>
-            | <END_LINE_COMMENT_CHAR>>
-| <#CUT_CHAR:                "!">
-| <#OPEN_CHAR:               "(">
-| <#CLOSE_CHAR:              ")">
-| <#COMMA_CHAR:              ",">
-| <#SEMICOLON_CHAR:          ";">
-| <#OPEN_LIST_CHAR:          "[">
-| <#CLOSE_LIST_CHAR:         "]">
-| <#OPEN_CURLY_CHAR:         "{">
-| <#CLOSE_CURLY_CHAR:        "}">
-| <#HEAD_TAIL_SEPARATOR_CHAR:"|">
-| <#END_LINE_COMMENT_CHAR:   "%">
+| <#SOLO_CHAR
+	: 	  <CUT_CHAR>
+            	| <OPEN_CHAR>
+	        | <CLOSE_CHAR>
+            	| <COMMA_CHAR>
+            	| <SEMICOLON_CHAR>
+            	| <OPEN_LIST_CHAR>
+            	| <CLOSE_LIST_CHAR>
+            	| <OPEN_CURLY_CHAR>
+            	| <CLOSE_CURLY_CHAR>
+            	| <HEAD_TAIL_SEPARATOR_CHAR>
+            	| <END_LINE_COMMENT_CHAR>				>
+            	
+| <#CUT_CHAR:                		"!"				>
+| <#OPEN_CHAR:               		"("				>
+| <#CLOSE_CHAR:              		")"				>
+| <#COMMA_CHAR:              		","				>
+| <#SEMICOLON_CHAR:          		";"				>
+| <#OPEN_LIST_CHAR:          		"["				>
+| <#CLOSE_LIST_CHAR:         		"]"				>
+| <#OPEN_CURLY_CHAR:         		"{"				>
+| <#CLOSE_CURLY_CHAR:        		"}"				>
+| <#HEAD_TAIL_SEPARATOR_CHAR:		"|"				>
+| <#END_LINE_COMMENT_CHAR:   		"%"				>
+
+
 // 6.5.4 LAYOUT CHARACTERS
-| <#LAYOUT_CHAR: <SPACE_CHAR>
-              | <NEW_LINE_CHAR>>
-| <#SPACE_CHAR:" " | "\t">
-| <#NEW_LINE_CHAR:  "\r\n" | "\n\r" | "\n" | "\r">
+| <#LAYOUT_CHAR
+	: 	  <SPACE_CHAR>
+              	| <NEW_LINE_CHAR>					>
+              	
+| <#SPACE_CHAR
+	:	  " " 
+		| "\t"							>
+		
+| <#NEW_LINE_CHAR
+	:  	  "\r\n" 
+		| "\n\r" 
+		| "\n" 
+		| "\r"							>
+
+		
 // 6.5.5 Meta characters
-| <#META_CHAR: <BACKSLASH_CHAR>
-            | <SINGLE_QUOTE_CHAR>
-            | <DOUBLE_QUOTE_CHAR>
-            | <BACK_QUOTE_CHAR>>
-| <#BACKSLASH_CHAR:"\\">
-| <#SINGLE_QUOTE_CHAR:"\'">
-| <#DOUBLE_QUOTE_CHAR:"\"">
-| <#BACK_QUOTE_CHAR:"`">
+| <#META_CHAR
+	: 	  <BACKSLASH_CHAR>
+            	| <SINGLE_QUOTE_CHAR>
+            	| <DOUBLE_QUOTE_CHAR>
+            	| <BACK_QUOTE_CHAR>					>
+            	
+| <#BACKSLASH_CHAR:			"\\"				>
+| <#SINGLE_QUOTE_CHAR:			"\'"				>
+| <#DOUBLE_QUOTE_CHAR:			"\""				>
+| <#BACK_QUOTE_CHAR:			"`"				>
 }
-
-
