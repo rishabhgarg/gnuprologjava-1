@@ -4,7 +4,7 @@
  * 
  * You only need to make changes in the TermParser.jj file which will reflect
  * the changes automatically in the .gen files and you are done. 
-
+ *
  * However, on using javacc TermParser.jj, you need to mae the following changes:
  * 1. The first line of the code of JavaCharStream.java needs to implement CharStream:
  *      --package gnu.prolog.io.parser.gen;
