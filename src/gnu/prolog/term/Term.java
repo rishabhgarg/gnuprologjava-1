@@ -88,4 +88,32 @@ public abstract class Term implements java.io.Serializable, Cloneable
 	{
 		return TermWriter.toString(this);
 	}
+
+	public String printOutput()
+	{
+		String dereferenced_string = "";
+		String output = TermWriter.toString(this);
+		String[] chars = output.split("\\\\");
+		for (int i = 0; i < chars.length; i++) {
+			if (chars[i].length() > 1 && chars[i].contains("x")) {
+				String temp = chars[i].substring(1, chars[i].length());
+				if (temp.length() == 1) {
+			        temp = "000" + temp;
+			    }
+				if (temp.length() == 2) {
+					temp = "00" + temp;
+			    }
+				if (temp.length() == 3) {
+					temp = "0" + temp;
+			    }
+			    int trial = Integer.parseInt(temp, 16);
+			    char final_answer = ((char)trial);
+			    dereferenced_string = dereferenced_string + final_answer;
+			}
+			else {
+				dereferenced_string = dereferenced_string + chars[i];
+			}
+		}
+		return dereferenced_string;
+	}
 }
