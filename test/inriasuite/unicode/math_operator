@@ -1,0 +1,6 @@
+/* file math_operator */
+
+∑(A, A, A).
+∑(A, B, N) :- B > A, A1 is A + 1, ∑(A1, B, N1), N is A + N1.
+
+/* end math_operator */
